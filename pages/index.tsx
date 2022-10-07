@@ -3,12 +3,13 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import Feedback from '../components/Feedback'
+import Matches from '../components/Matches'
 const Home: NextPage = () => {
   return (
     <div className='md:w-[750px] w-full h-full p-2'>
       <Feedback />
-      {/* <Matches />
-      <AddCRN />
+      <Matches />
+      { /* <AddCRN />
       <DropCRN /> */}
     </div>
   )
