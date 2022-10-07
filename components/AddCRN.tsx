@@ -2,7 +2,7 @@ import React from 'react'
 import {FaTrash} from 'react-icons/fa'
 const AddCRN = () => {
   return (
-    <div className='flex-col pb-6'>
+    <div className='flex-col mb-3 border-[gray-100] border-2 rounded-xl p-3'>
         {/* title container */}
         <div className='pb-3'>
             <p className='text-2xl font-mono underline'>CRN's to Add</p>

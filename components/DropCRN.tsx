@@ -2,7 +2,7 @@ import React from 'react'
 import {FaTrash} from 'react-icons/fa'
 const DropCRN = () => {
   return (
-    <div className='flex-col pb-14'>
+    <div className='flex-col mb-14 border-[gray-100] border-2 rounded-xl p-3'>
         {/* title container */}
         <div className='pb-3'>
             <p className='text-2xl font-mono underline'>CRN's to Drop</p>
