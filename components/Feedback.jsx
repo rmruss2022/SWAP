@@ -3,7 +3,7 @@ import {TbArrowsLeftRight} from 'react-icons/tb'
 const Feedback = () => {
   return (
     // feedbackSwaps.map((feedback : Feedback) => ())
-    <div className='flex-col pb-4'>
+    <div className='flex-col pb-6'>
         {/* title container */}
         <div className='pb-2'>
             <p className='text-2xl font-mono underline'>Report your SWAP's Feedback</p>

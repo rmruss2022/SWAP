@@ -12,7 +12,7 @@ const Matches = () => {
 
   return (
     // matches.map((match : Match) => ())
-    <div className='flex-col'>
+    <div className='flex-col pb-6'>
         {/* title container */}
         <div className='pb-2'>
             <p className='text-2xl font-mono underline'>Matches</p>
@@ -26,10 +26,10 @@ const Matches = () => {
             <p className='font-mono pb-1'>Set SWAP Date & Time</p>
             <DatePicker selected={startDate} onChange={(date) => {console.log('date: ', date, 'date.now: ', Date.now()-7200); if (date >= Date.now()-7200) {setStartDate(date) }}} className='border-2 rounded-md p-1' />
             <TimePicker className='mt-2 mb-2 w-[185px]' onChange={onChange} value={value} />
-            <p className='font-mono mt-1 mb-1'>Suggested Time from russellm22@vt.edu</p>
+            <p className='font-mono mt-2 mb-1'>Suggested Time from russellm22@vt.edu</p>
             <DatePicker selected={startDate} onChange={(date) => {console.log('date: ', date, 'date.now: ', Date.now()-7200); if (date >= Date.now()-7200) {setStartDate(date) }}} className='border-2 rounded-md p-1' />
             <TimePicker className='mt-2 mb-2 w-[185px]' onChange={onChange} value={value} />
-            <button className='w-[200px] text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800'>Confirm Partner Suggested Time</button>
+            <button className='w-[185px] text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800'>Confirm Partner Suggested Time</button>
         </div>
     </div>
   )
