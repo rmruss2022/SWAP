@@ -6,7 +6,7 @@ const Feedback = () => {
     <div className='flex-col mb-3 border-[gray-100] border-2 rounded-xl p-3'>
         {/* title container */}
         <div className='pb-2'>
-            <p className='text-2xl font-mono underline'>Report your SWAP's Feedback</p>
+            <p className='text-2xl font-mono underline'>Report your SWAPs Feedback</p>
         </div>
         <div className='flex gap-6 items-center pb-2'>
             <p className='text-xl font-mono text-[green]'>CS3704</p>
