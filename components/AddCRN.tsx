@@ -5,7 +5,7 @@ const AddCRN = () => {
     <div className='flex-col mb-3 border-[gray-100] border-2 rounded-xl p-3'>
         {/* title container */}
         <div className='pb-3'>
-            <p className='text-2xl font-mono underline'>CRN's to Add</p>
+            <p className='text-2xl font-mono underline'>`CRN's to Add`</p>
         </div>
         {/* add by crn */}
         <div className='flex gap-6 items-center pb-4'>

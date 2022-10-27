@@ -26,8 +26,8 @@ export default function Home({data} : any) {
   }
   return (
    <div>
-      { data.map((property : any) => (
-        <div>
+      { data.map((property : any, id : number) => (
+        <div key={id}>
           <Image src={property.images.picture_url} height={400} width={400} />
           <p>{property.name}</p>
           <button onClick={() => book(property)} className='bg-[blue] p-6 rounded-md my-8 '>Book</button>
