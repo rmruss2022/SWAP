@@ -1,95 +1,192 @@
-import Head from 'next/head'
 import clientPromise from '../lib/mongodb'
 import { InferGetServerSidePropsType } from 'next'
 import Image from 'next/image'
-import { BASE_URL } from '../utils/utils';
+import type { NextPage } from 'next'
+import Head from 'next/head'
+import styles from '../styles/Home.module.css'
+import Feedback from '../components/Feedback'
+import Matches from '../components/Matches'
+import AddCRN from '../components/AddCRN'
+import DropCRN from '../components/DropCRN'
+import { useEffect, useState } from 'react'
+import axios from 'axios'
+import { BASE_URL } from '../utils/utils'
+import { iFeedback, iMatch, iSwapTime, iRequest, iAdding, iDropping } from '../utils/types'
+import { request } from 'http'
+const ObjectID = require("mongodb").ObjectID;
+
+const userid = '6346d05cd53a982ce15d0601'
+
 
 export async function getServerSideProps(context: any) {
   const client = await clientPromise;
-  const db = client.db("sample_airbnb");
-  const data = await db.collection('listingsAndReviews').find().limit(20).toArray();
-  const serial = JSON.parse(JSON.stringify(data))
+  const db = client.db("SWAP");
+
+  // query open feedbacks
+  const feedbacks = await db.collection('feedback').aggregate([
+    {
+      $lookup: {
+        from: 'request',
+        localField: 'request',
+        foreignField: '_id',
+        as: 'requestObject'
+      }
+    }
+  ]).toArray()
+  console.log('feedbacks: ', feedbacks)
+  
+  //.find({userid : new ObjectID(userid), submitted: false}).toArray();
+  
+  // query open matches
+  const matches = await db.collection('matches').aggregate([
+    {
+      $match : 
+      {
+        $and : [
+          {
+            alive: true
+          },
+          {
+            $or : 
+              [
+                {
+                  userid1: new ObjectID(userid)
+                },
+                {
+                  userid2: new ObjectID(userid)
+                }
+              ]
+          }
+        ]
+      }
+
+    },
+    {
+      $lookup :
+        {
+          from: "request",
+          localField: "request_1",
+          foreignField: "_id",
+          as: "request1Object"
+        }
+    },
+    {
+      $lookup :
+        {
+          from: "request",
+          localField: "request_2",
+          foreignField: "_id",
+          as: "request2Object"
+        }
+    }
+  ]).toArray();
+
+  // query times for each match
+  const matchTimes : any = {}
+  for (let i = 0; i < matches.length; i++) {
+    const times = await db.collection('swaptime').find({match: new ObjectID(matches[i]['_id']) }).toArray();
+    matchTimes[`${matches[i]['_id']}`] = times
+  }
+  // query requests
+  const requests = await db.collection('request').find({userid : new ObjectID(userid)}).toArray();
+  // parse into adding CRN's and Dropping CRN's
+  const adding : any = {}
+  const dropping : any = {}
+  for (let i = 0; i < requests.length; i++) {
+    console.log(requests[i])
+    adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course']}
+    dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course']}
+  }
+  console.log('dropping keys: ', Object.keys(dropping))
+  console.log('dropping : ', dropping)
+  const addingArr = Object.keys(adding).map(add => adding[add])
+  const droppingArr = Object.keys(dropping).map(drop => dropping[drop])
+
+  // serialize 
+  const serialFeedbacks = JSON.parse(JSON.stringify(feedbacks))
+  const serialMatches = JSON.parse(JSON.stringify(matches))
+  const serialMatchTimes = JSON.parse(JSON.stringify(matchTimes))
     return {
-      props: { 
-        data : serial
+      props: {
+        feedbacks : serialFeedbacks,
+        matches: serialMatches,
+        matchTimes : serialMatchTimes,
+        adding : addingArr,
+        dropping: droppingArr,
        },
     }
   }
 
+interface IProps {
+  feedbacks: [iFeedback],
+  matches: [iMatch],
+  matchTimes : [iSwapTime],
+  adding : [iAdding],
+  dropping: [iDropping]
+}
 
-export default function Home({data} : any) {
+const Home = ({feedbacks, matches, matchTimes, adding, dropping} : IProps) => {
 
-  const book = async (property : any) => {
-    const resp = await fetch(`${BASE_URL}/api/book?propertyid=${property._id}&guests=ado`)
-    const respJson = await resp.json()
-    console.log('resp: ', respJson)
+
+  console.log(feedbacks, matches, adding, dropping, matchTimes)
+  // hooks
+  const [feedbacksState, setFeedbacksState] = useState(feedbacks)
+  const [matchesState, setMatchesState] = useState([])
+  const [addingCRNs, setAddingCRNs] = useState(adding)
+  const [droppingCRNs, setDroppingCRNs] = useState(dropping)
+
+
+  const removeAddedCRN = (crn : String) => {
+    return 0
   }
+  const addAddedCRN = (crn : String) => {
+    return 0
+  }
+  const removeDroppedCRN = (crn : String) => {
+    return 0
+  }
+  // add a crn to drop, loop through all adding and make new requests
+  const addDroppedCRN = async (crn : String) => {
+    const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: userid, isAdd : false, adding: addingCRNs, crn: crn})
+    console.log('resp adddroppedcrn: ', resp)
+    const {data} = await axios.get(`${BASE_URL}/api/request/getByUserId?userid=${userid}`)
+    console.log('updated requests: ', data)
+    // parse into adding CRN's and Dropping CRN's
+    const adding = new Set<iAdding>()
+    const dropping = new Set<iDropping>()
+    for (let i = 0; i < data.length; i++) {
+      adding.add({crn : data[i]['add_crn'], title : data[i]['add_classtitle'], course : data[i]['add_course']} )
+      dropping.add({crn : data[i]['drop_crn'], title : data[i]['drop_classtitle'], course : data[i]['drop_course']})
+    }
+    const addingArr : any = Array.from(adding)
+    const droppingArr : any = Array.from(dropping)
+    setDroppingCRNs(addingArr)
+    setAddingCRNs(droppingArr)
+  }
+  const updateFeedback = () => {
+    return 0
+  }
+  const removeMatch = () => {
+    return 0
+  }
+  const addTime = () => {
+    return 0
+  }
+  const updateTime = () => {
+    return 0
+  }
+  const confirmTime = () => {
+    return 0;
+  }
+
   return (
-   <div>
-      { data.map((property : any, id : number) => (
-        <div key={id}>
-          <Image src={property.images.picture_url} height={400} width={400} />
-          <p>{property.name}</p>
-          <button onClick={() => book(property)} className='bg-[blue] p-6 rounded-md my-8 '>Book</button>
-        </div>
-      )) }
-   </div>
+    <div className='md:w-[750px] w-full h-full p-2'>
+      <Feedback feedbacks={feedbacks} />
+      <Matches matches={matches} matchTimes={matchTimes} />
+      <AddCRN adding={addingCRNs} addAddedCRN={addAddedCRN} removeAddedCRN={removeAddedCRN} />
+      <DropCRN dropping={droppingCRNs} addDroppedCRN={addDroppedCRN} removeDroppedCRN={removeDroppedCRN} />
+    </div>
   )
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import type { NextPage } from 'next'
-// import Head from 'next/head'
-// import Image from 'next/image'
-// import styles from '../styles/Home.module.css'
-// import Feedback from '../components/Feedback'
-// import Matches from '../components/Matches'
-// import AddCRN from '../components/AddCRN'
-// import DropCRN from '../components/DropCRN'
-// import { useEffect } from 'react'
-// import axios from 'axios'
-// import { BASE_URL } from '../utils/utils'
-// const Home: NextPage = () => {
-
-//   useEffect(() => {
-//     async function getProps() {
-//       console.log('loading')
-//       const users = await axios.get(`${BASE_URL}/api/users`)
-//       console.log('users: ', users)
-
-//     }
-//     getProps()
-//   }, [])
-  
-
-//   return (
-//     <div className='md:w-[750px] w-full h-full p-2'>
-//       <Feedback />
-//       <Matches />
-//       <AddCRN />
-//       <DropCRN />
-//     </div>
-//   )
-// }
-
-// export default Home
+export default Home
