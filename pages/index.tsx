@@ -8,7 +8,7 @@ import Feedback from '../components/Feedback'
 import Matches from '../components/Matches'
 import AddCRN from '../components/AddCRN'
 import DropCRN from '../components/DropCRN'
-import { useEffect, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 import axios from 'axios'
 import { BASE_URL } from '../utils/utils'
 import { iFeedback, iMatch, iSwapTime, iRequest, iAdding, iDropping } from '../utils/types'
@@ -97,8 +97,6 @@ export async function getServerSideProps(context: any) {
     adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course']}
     dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course']}
   }
-  console.log('dropping keys: ', Object.keys(dropping))
-  console.log('dropping : ', dropping)
   const addingArr = Object.keys(adding).map(add => adding[add])
   const droppingArr = Object.keys(dropping).map(drop => dropping[drop])
 
@@ -124,6 +122,7 @@ interface IProps {
   adding : [iAdding],
   dropping: [iDropping]
 }
+export var AppContext = createContext<any>(null);
 
 const Home = ({feedbacks, matches, matchTimes, adding, dropping} : IProps) => {
 
@@ -134,6 +133,7 @@ const Home = ({feedbacks, matches, matchTimes, adding, dropping} : IProps) => {
   const [matchesState, setMatchesState] = useState([])
   const [addingCRNs, setAddingCRNs] = useState(adding)
   const [droppingCRNs, setDroppingCRNs] = useState(dropping)
+
 
 
   const removeAddedCRN = (crn : String) => {
@@ -150,18 +150,20 @@ const Home = ({feedbacks, matches, matchTimes, adding, dropping} : IProps) => {
     const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: userid, isAdd : false, adding: addingCRNs, crn: crn})
     console.log('resp adddroppedcrn: ', resp)
     const {data} = await axios.get(`${BASE_URL}/api/request/getByUserId?userid=${userid}`)
-    console.log('updated requests: ', data)
+    const requests = data;
     // parse into adding CRN's and Dropping CRN's
-    const adding = new Set<iAdding>()
-    const dropping = new Set<iDropping>()
-    for (let i = 0; i < data.length; i++) {
-      adding.add({crn : data[i]['add_crn'], title : data[i]['add_classtitle'], course : data[i]['add_course']} )
-      dropping.add({crn : data[i]['drop_crn'], title : data[i]['drop_classtitle'], course : data[i]['drop_course']})
+    const adding : any = {}
+    const dropping : any = {}
+    for (let i = 0; i < requests.length; i++) {
+      console.log(requests[i])
+      adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course']}
+      dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course']}
     }
-    const addingArr : any = Array.from(adding)
-    const droppingArr : any = Array.from(dropping)
-    setDroppingCRNs(addingArr)
-    setAddingCRNs(droppingArr)
+    const addingArr : any = Object.keys(adding).map(add => adding[add])
+    const droppingArr : any = Object.keys(dropping).map(drop => dropping[drop])
+    console.log('droppingarr: ', droppingArr)
+    setDroppingCRNs(droppingArr)
+    setAddingCRNs(addingArr)
   }
   const updateFeedback = () => {
     return 0
@@ -179,12 +181,18 @@ const Home = ({feedbacks, matches, matchTimes, adding, dropping} : IProps) => {
     return 0;
   }
 
+  useEffect(() => {
+    console.log('dropping crns: ', droppingCRNs)
+  }, [droppingCRNs])
+
   return (
     <div className='md:w-[750px] w-full h-full p-2'>
-      <Feedback feedbacks={feedbacks} />
-      <Matches matches={matches} matchTimes={matchTimes} />
-      <AddCRN adding={addingCRNs} addAddedCRN={addAddedCRN} removeAddedCRN={removeAddedCRN} />
-      <DropCRN dropping={droppingCRNs} addDroppedCRN={addDroppedCRN} removeDroppedCRN={removeDroppedCRN} />
+      <AppContext.Provider value={droppingCRNs}>
+        <Feedback feedbacks={feedbacks} />
+        <Matches matches={matches} matchTimes={matchTimes} />
+        <AddCRN adding={addingCRNs} addAddedCRN={addAddedCRN} removeAddedCRN={removeAddedCRN} />
+        <DropCRN dropping={droppingCRNs} addDroppedCRN={addDroppedCRN} removeDroppedCRN={removeDroppedCRN} />
+      </AppContext.Provider>
     </div>
   )
 }
