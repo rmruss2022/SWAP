@@ -136,12 +136,12 @@ var Status = {
   function search_timetable(
     year,
     semester,
-    campus,
+    crn,
     pathway,
     subject,
     section_type,
     code,
-    crn,
+    campus,
     status,
     modality
   ) {
@@ -153,16 +153,23 @@ var Status = {
     modality = Modality.ALL;
   
     //Setting the correct term year
+    var term_year = 0;
     if (semester == Semester.WINTER) {
-      term_year = str(int(year) - 1) + semester.value;
+      term_year = year - 1 +(semester);
     } else {
-      term_year = year + semester.value;
+      term_year = year + (semester);
     }
     //Setting the correct subject
-    if (subject == "") {
+    if (subject == "" || subject == undefined) {
       subject = "%";
     } else {
       subject = subject;
+    }
+     //Setting the correct subject
+     if (code == undefined) {
+      code = "";
+    } else {
+      code = code;
     }
   
     var request_data = {
@@ -198,9 +205,9 @@ var Status = {
   function makeRequest(requestType, requestData) {
     var url = "https://apps.es.vt.edu/ssb/HZSKVTSC.P_ProcRequest";
     if (requestType == "post") {
-      for (r in requestData) {
-        request_data[r] = request_data[r].value;
-      }
+      // for (r in requestData) {
+      //   request_data[r] = request_data[r].value;
+      // }
   
       const postRequest = fetch(url, {
         method: "post",
