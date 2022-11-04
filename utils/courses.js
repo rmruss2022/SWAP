@@ -118,10 +118,124 @@ class Course {
             additional classes scraped from the timetable.
     */
   constructor(year, semester, timetable_data, extra_class_data) {
-    subject, (code = timetable_data[1].match("(.+)-(.+)").group(1, 2));
-    semester = this.Semester;
+    const array = [...timetable_data[1].matchAll(/(.+)-(.+)/g)];
+    subject, (code = array[0][1]), array[0][2];
 
-    //Stuck here --------------------------------------------------------
+    let name = "";
+
+    if (semester == Semester.SUMMER) {
+      const arraybreak = [
+        ...timetable_data[2].matchAll(/- \d{2}-[A-Z]{3}-\d{4}(.+)$/g),
+      ];
+      name = arraybreak[0][1];
+    } else {
+      name = timetable_data[2];
+    }
+
+    let section_type = "";
+
+    if (timetable_data[3].match(/'ONLINE COURSE'/)) {
+      section_type = this._section_type_dct["O"];
+    } else {
+      const arrayBreak2 = timetable_data[3].match(/'[LBICR]'/);
+      section_type = this._section_type_dct[arrayBreak2[0]];
+    }
+
+    let modality = null;
+
+    if (timetable_data[4] in this._modality_dct) {
+      modality = this._modality_dct[timetable_data[4]];
+    } else {
+      modality = null;
+    }
+
+    let class_dct = {};
+
+    timetable_data[8].split(" ").forEach((d) => {
+      let day = this._day_dct[d];
+      if (day === Day.ARRANGED) {
+      } else {
+        class_dct[day] = [
+          timetable_data[9],
+          timetable_data[10],
+          timetable_data[11],
+        ];
+      }
+    });
+
+    if (
+      extra_class_data != null &&
+      extra_class_data[4] == "* Additional Times *"
+    ) {
+      extra_class_data[8].split(" ").forEach((d) => {
+        let day = this._day_dct[d];
+        class_dct[day] = [
+          extra_class_data[9],
+          extra_class_data[10],
+          extra_class_data[11],
+        ];
+      });
+    }
+
+    let _course_data = {
+      year: year,
+      semester: semester,
+      crn: timetable_data[0].slice(0, 5),
+      subject: subject,
+      code: code,
+      name: name,
+      section_type: section_type,
+      modality: modality,
+      credit_hours: timetable_data[5],
+      capacity: timetable_data[6],
+      professor: timetable_data[7],
+      schedule: class_dct,
+    };
+
+    //  def __str__(self):
+    // return ''.join(
+    //     f'{d}: {self._course_data[d]}, ' for d in self._course_data)[:-2]
+
+    // def get_year(self) -> str:
+    //     return self._course_data['year']
+
+    // def get_semester(self) -> Semester:
+    //     return self._course_data['semester']
+
+    // def get_crn(self) -> str:
+    //     return self._course_data['crn']
+
+    // def get_subject(self) -> str:
+    //     return self._course_data['subject']
+
+    // def get_code(self) -> str:
+    //     return self._course_data['code']
+
+    // def get_name(self) -> str:
+    //     return self._course_data['name']
+
+    // def get_type(self) -> SectionType:
+    //     return self._course_data['section_type']
+
+    // def get_modality(self) -> Modality:
+    //     return self._course_data['modality']
+
+    // def get_credit_hours(self) -> str:
+    //     return self._course_data['credit_hours']
+
+    // def get_capacity(self) -> str:
+    //     return self._course_data['capacity']
+
+    // def get_professor(self) -> str:
+    //     return self._course_data['professor']
+
+    // def get_schedule(self) -> Dict[Day, Set[Tuple[str, str, str]]]:
+    //     return self._course_data['schedule']
+
+    // def has_open_spots(self) -> bool:
+    //     return True if search_timetable(self.get_year(), self.get_semester(),
+    //                                     crn=self.get_crn(),
+    //                                     status=Status.OPEN) else False
   }
 }
 
@@ -165,7 +279,7 @@ function search_timetable(
     subject = subject;
   }
 
-  var request_data = {
+  var data = {
     CAMPUS: campus,
     TERMYEAR: term_year,
     CORE_CODE: pathway,
@@ -177,7 +291,7 @@ function search_timetable(
     sess_code: modality,
   };
 
-  var request = makeRequest("post", request_data);
+  var request = makeRequest("post", data);
 
   //If there are no matches return empty list
   if (request == "") {
@@ -195,37 +309,43 @@ function search_timetable(
   //Need to read html tables, not sure what to use in js library
 }
 
-function makeRequest(requestType, requestData) {
-  var url = "https://apps.es.vt.edu/ssb/HZSKVTSC.P_ProcRequest";
-  if (requestType == "post") {
-    for (r in requestData) {
-      request_data[r] = request_data[r].value;
-    }
+function makeRequest(requestType, data) {
+  let url = "https://apps.es.vt.edu/ssb/HZSKVTSC.P_ProcRequest";
 
-    const postRequest = fetch(url, {
-      method: "post",
-      payload: requestData,
-    });
-    // if the request contains an error, throw an error
-    if (postRequest.status_code != 200) {
-      throw new Error("Request failed");
-    }
-    // if (request.text() == "THERE IS AN ERROR WITH YOUR REQUEST") {
-    //   exit("There was an error with your request. Please try again.");
-    // }
-    // if (request.text()  "There was a problem with your request") {
-    //   exit("There was an error with your request. Please try again.");
-    // }
-    // if (request.text() == "NO SECTIONS FOUND FOR THIS INQUIRYs") {
-    //   exit("There was an error with your request. Please try again.");
-    // }
+  let headers = {
+    "User-Agent": "Axios 0.21.1",
+    "Accept-Encoding": "gzip, deflate",
+    Accept: "*/*",
+    Connection: "keep-alive",
+    "Content-Length": "115",
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
+
+  if (requestType == "post") {
+    axios
+      .post(url, data, {
+        headers: headers,
+      })
+      .then(
+        (response) => {
+          console.log(response.data);
+        },
+        (error) => {
+          throw new Error(`${error}`);
+        }
+      );
+
     return request.text();
   } else if (requestType == "get") {
-    const getRequest = fetch(url, { method: "get" });
-    // if the request contains an error, throw an error
-    if (getRequest.status_code != 200) {
-      throw new Error("Request failed");
-    }
+    axios.get(url).then(
+      (response) => {
+        console.log(response.data);
+      },
+      (error) => {
+        throw new Error(`${error}`);
+      }
+    );
+
     return getRequest.text();
   } else {
     throw new Error("Invalid request type");
