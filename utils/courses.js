@@ -1,77 +1,80 @@
-//API to get the course information from va tech.
+import axios from "axios";
+import cheerio from "cheerio";
+import fs from "fs";
 
+//API to get the course information from va tech.
 //Class for campus type.
-class Campus {
-  BLACKSBURG = "0";
-  VIRTUAL = "10";
-}
+var Campus = {
+  BLACKSBURG: "0",
+  VIRTUAL: "10",
+};
 
 //Class for day of the week course is.
-class Day {
-  MONDAY = "Monday";
-  TUESDAY = "Tuesday";
-  WEDNESDAY = "Wednesday";
-  THURSDAY = "Thursday";
-  FRIDAY = "Friday";
-  SATURDAY = "Saturday";
-  SUNDAY = "Sunday";
-  ARRANGED = "Arranged";
-}
+var Day = {
+  MONDAY: "Monday",
+  TUESDAY: "Tuesday",
+  WEDNESDAY: "Wednesday",
+  THURSDAY: "Thursday",
+  FRIDAY: "Friday",
+  SATURDAY: "Saturday",
+  SUNDAY: "Sunday",
+  ARRANGED: "Arranged",
+};
 
 //Class for the modality of the course
-class Modality {
-  ALL = "%";
-  IN_PERSON = "A";
-  HYBRID = "H";
-  ONLINE_SYNC = "N";
-  ONLINE_ASYNC = "O";
-}
+var Modality = {
+  ALL: "%",
+  IN_PERSON: "A",
+  HYBRID: "H",
+  ONLINE_SYNC: "N",
+  ONLINE_ASYNC: "O",
+};
 
 //Class for the pathways the course staisfies.
-class Pathway {
-  ALL = "AR%";
-  CLE_1 = "AR01";
-  CLE_2 = "AR02";
-  CLE_3 = "AR03";
-  CLE_4 = "AR04";
-  CLE_5 = "AR05";
-  CLE_6 = "AR06";
-  CLE_7 = "AR07";
-  PATH_1A = "G01A";
-  PATH_1F = "G01F";
-  PATH_2 = "G02";
-  PATH_3 = "G03";
-  PATH_4 = "G02";
-  PATH_5A = "G02";
-  PATH_5F = "G02";
-  PATH_6A = "G06A";
-  PATH_6D = "G06D";
-  PATH_7 = "G07";
-}
+var Pathway = {
+  ALL: "AR%",
+  CLE_1: "AR01",
+  CLE_2: "AR02",
+  CLE_3: "AR03",
+  CLE_4: "AR04",
+  CLE_5: "AR05",
+  CLE_6: "AR06",
+  CLE_7: "AR07",
+  PATH_1A: "G01A",
+  PATH_1F: "G01F",
+  PATH_2: "G02",
+  PATH_3: "G03",
+  PATH_4: "G02",
+  PATH_5A: "G02",
+  PATH_5F: "G02",
+  PATH_6A: "G06A",
+  PATH_6D: "G06D",
+  PATH_7: "G07",
+};
 
 //Used to get information about the semester
-class Semester {
-  SPRING = "01";
-  SUMMER = "06";
-  FALL = "09";
-  WINTER = "12";
-}
+var Semester = {
+  SPRING: "01",
+  SUMMER: "06",
+  FALL: "09",
+  WINTER: "12",
+};
 
-class SectionType {
-  ALL = "%";
-  INDEPENDENT_STUDY = "%I%";
-  LAB = "%B%";
-  LECTURE = "%L%";
-  RECITATION = "%C%";
-  RESEARCH = "%R%";
-  ONLINE = "ONLINE";
-}
+var SectionType = {
+  ALL: "%",
+  INDEPENDENT_STUDY: "%I%",
+  LAB: "%B%",
+  LECTURE: "%L%",
+  RECITATION: "%C%",
+  RESEARCH: "%R%",
+  ONLINE: "ONLINE",
+};
 
 //Used to see if the class is open or not
-class Status {
-  ALL = "";
-  OPEN = "on";
-}
+var Status = {
+  ALL: "",
+  OPEN: "on",
+};
 
 //Used as a container for information about vt courses
 class Course {
@@ -102,6 +105,8 @@ class Course {
     "(ARR)": Day.ARRANGED,
   };
 
+  _course_data = {};
+
   /*
     Args:
         year:
@@ -119,7 +124,9 @@ class Course {
     */
   constructor(year, semester, timetable_data, extra_class_data) {
     const array = [...timetable_data[1].matchAll(/(.+)-(.+)/g)];
-    subject, (code = array[0][1]), array[0][2];
+
+    let subject = array[0][1];
+    let code = array[0][2];
 
     let name = "";
 
@@ -134,10 +141,10 @@ class Course {
 
     let section_type = "";
 
-    if (timetable_data[3].match(/'ONLINE COURSE'/)) {
+    if (timetable_data[3].match(/ONLINE COURSE/g)) {
       section_type = this._section_type_dct["O"];
     } else {
-      const arrayBreak2 = timetable_data[3].match(/'[LBICR]'/);
+      const arrayBreak2 = timetable_data[3].match(/[LBICR]/g);
       section_type = this._section_type_dct[arrayBreak2[0]];
     }
 
@@ -151,9 +158,12 @@ class Course {
 
     let class_dct = {};
 
-    timetable_data[8].split(" ").forEach((d) => {
-      let day = this._day_dct[d];
-      if (day === Day.ARRANGED) {
+    let courseTimesSplit = timetable_data[8].split(" ");
+    for (let i = 0; i < courseTimesSplit.length; i++) {
+      let day = this._day_dct[courseTimesSplit[i]];
+
+      if (day == Day.ARRANGED) {
+        // Continue;
       } else {
         class_dct[day] = [
           timetable_data[9],
@@ -161,23 +171,26 @@ class Course {
           timetable_data[11],
         ];
       }
-    });
+    }
 
     if (
       extra_class_data != null &&
       extra_class_data[4] == "* Additional Times *"
     ) {
-      extra_class_data[8].split(" ").forEach((d) => {
-        let day = this._day_dct[d];
+      let courseTimesSplit = extra_class_data[8].split(" ");
+
+      for (let i = 0; i < courseTimesSplit.length; i++) {
+        let day = this._day_dct[courseTimesSplit[i]];
+
         class_dct[day] = [
           extra_class_data[9],
           extra_class_data[10],
           extra_class_data[11],
         ];
-      });
+      }
     }
 
-    let _course_data = {
+    this._course_data = {
       year: year,
       semester: semester,
       crn: timetable_data[0].slice(0, 5),
@@ -191,89 +204,160 @@ class Course {
       professor: timetable_data[7],
       schedule: class_dct,
     };
+  }
 
-    //  def __str__(self):
-    // return ''.join(
-    //     f'{d}: {self._course_data[d]}, ' for d in self._course_data)[:-2]
+  toString() {
+    return JSON.stringify(this._course_data);
+  }
 
-    // def get_year(self) -> str:
-    //     return self._course_data['year']
+  get_year() {
+    return this._course_data["year"];
+  }
 
-    // def get_semester(self) -> Semester:
-    //     return self._course_data['semester']
+  get_semester() {
+    return this._course_data["semester"];
+  }
 
-    // def get_crn(self) -> str:
-    //     return self._course_data['crn']
+  get_crn() {
+    return this._course_data["crn"];
+  }
 
-    // def get_subject(self) -> str:
-    //     return self._course_data['subject']
+  get_subject() {
+    return this._course_data["subject"];
+  }
 
-    // def get_code(self) -> str:
-    //     return self._course_data['code']
+  get_code() {
+    return this._course_data["code"];
+  }
 
-    // def get_name(self) -> str:
-    //     return self._course_data['name']
+  get_name() {
+    return this._course_data["name"];
+  }
 
-    // def get_type(self) -> SectionType:
-    //     return self._course_data['section_type']
+  get_type() {
+    return this._course_data["section_type"];
+  }
 
-    // def get_modality(self) -> Modality:
-    //     return self._course_data['modality']
+  get_modality() {
+    return this._course_data["modality"];
+  }
 
-    // def get_credit_hours(self) -> str:
-    //     return self._course_data['credit_hours']
+  get_credit_hours() {
+    return this._course_data["credit_hours"];
+  }
 
-    // def get_capacity(self) -> str:
-    //     return self._course_data['capacity']
+  get_capacity() {
+    return this._course_data["capacity"];
+  }
 
-    // def get_professor(self) -> str:
-    //     return self._course_data['professor']
+  get_professor() {
+    return this._course_data["professor"];
+  }
 
-    // def get_schedule(self) -> Dict[Day, Set[Tuple[str, str, str]]]:
-    //     return self._course_data['schedule']
+  get_schedule() {
+    return this._course_data["schedule"];
+  }
 
-    // def has_open_spots(self) -> bool:
-    //     return True if search_timetable(self.get_year(), self.get_semester(),
-    //                                     crn=self.get_crn(),
-    //                                     status=Status.OPEN) else False
+  async has_open_spots() {
+    if (
+      await searchTimetable({
+        year: this.get_year(),
+        semester: this.get_semester(),
+        crn: this.get_crn(),
+        status: Status.OPEN,
+      })
+    ) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
 
 //Returns a single course if it exists with this crn otherwise nothing.
-function getCRN(year, semester, crn) {
-  crn_search = search_timetable(year, semester, crn);
+async function getCRN(year, semester, crn) {
+  let crn_search = await searchTimetable({
+    year: year,
+    semester: semester,
+    crn: crn,
+  });
   if (crn_search) {
     return crn_search[0];
   }
 }
 
-function search_timetable(
+async function getSemesters() {
+  /** Fetches the semesters listed in the timetable.
+  Returns:
+      A set of length-2 tuples representing the semesters listed in the
+      timetable. The first element of each tuple is the semester, and the
+      second element of each tuple is the year.
+  */
+  let semester_dct = {
+    Spring: Semester.SPRING,
+    Summer: Semester.SUMMER,
+    Fall: Semester.FALL,
+    Winter: Semester.WINTER,
+  };
+
+  let semestersRegexMatches = [
+    ...(await makeRequest({ request_type: "GET" })).matchAll(
+      /<OPTION VALUE="\d{6}">([A-Z][a-z]+) (\d+)<\/OPTION>/g
+    ),
+  ];
+
+  let semesters = [];
+  semestersRegexMatches.forEach((e) => {
+    semesters.push([semester_dct[e[1]], e[2]]);
+  });
+
+  return semesters;
+}
+
+async function getSubjects() {
+  /** Fetches the course subjects listed in the timetable.
+ Returns:
+     A set of length-2 tuples representing the course subjects listed in the
+     timetable. The first element of each tuple is the abbreviation of the
+     subject name, and the second element of each tuple is is the full
+     subject name.
+ */
+
+  let subjectRegexMatches = [
+    ...(await makeRequest({ request_type: "GET" })).matchAll(
+      /"([A-Z]+) - (.+?)"/g
+    ),
+  ];
+
+  let subjects = [];
+  subjectRegexMatches.forEach((e) => {
+    subjects.push([e[1], e[2]]);
+  });
+
+  return subjects;
+}
+
+async function searchTimetable({
   year,
   semester,
-  campus,
-  pathway,
-  subject,
-  section_type,
-  code,
-  crn,
-  status,
-  modality
-) {
-  semester = Semester;
-  campus = Campus.BLACKSBURG;
-  pathway = Pathway.ALL;
-  section_type = SectionType.ALL;
-  status = Status.ALL;
-  modality = Modality.ALL;
-
+  campus = Campus.BLACKSBURG,
+  pathway = Pathway.ALL,
+  subject = "",
+  section_type = SectionType.ALL,
+  code = "",
+  crn = "",
+  status = Status.ALL,
+  modality = Modality.ALL,
+} = {}) {
   //Setting the correct term year
+  var term_year = 0;
   if (semester == Semester.WINTER) {
-    term_year = str(int(year) - 1) + semester.value;
+    term_year = year - 1 + semester;
   } else {
-    term_year = year + semester.value;
+    term_year = year + semester;
   }
   //Setting the correct subject
-  if (subject == "") {
+  if (subject == "" || subject == undefined) {
     subject = "%";
   } else {
     subject = subject;
@@ -291,65 +375,83 @@ function search_timetable(
     sess_code: modality,
   };
 
-  var request = makeRequest("post", data);
+  let request = await makeRequest({ requestType: "post", data: data });
 
   //If there are no matches return empty list
   if (request == "") {
     return [];
   }
 
-  request_data = readHtml(request)[4];
-  course_list = [];
-  // for i in range(1, request_data.shape[0]) {
-  //     if isinstance(request_data.iloc[i][0], str){
-  //         course_list.append(Course(year, semester, request_data.iloc[i], request_data.iloc[i + 1] if request_data.shape[0] > i + 1 else None))
-  //     }
-  // }
+  // write to file
+  // fs.writeFile("./Test/outJs.html", request, function (err) {
+  //   if (err) {
+  //     return console.log(err);
+  //   }
+  //   console.log("The file was saved!");
+  // });
+
+  let request_data = readHtml(request);
+
+  let course_list = [];
+  // console.log(request_data);
+  for (let i = 1; i < request_data.length; i++) {
+    course_list.push(
+      new Course(
+        year,
+        semester,
+        request_data[i],
+        request_data.length > i + 1 ? request_data[i + 1] : null
+      )
+    );
+  }
   return course_list;
-  //Need to read html tables, not sure what to use in js library
 }
 
-function makeRequest(requestType, data) {
+function readHtml(request) {
+  // parse the html file into a DOM object and then use jQuery to select the table element
+  const $ = cheerio.load(request);
+  const table = $("table").get(4);
+
+  // convert the table to a 2D array
+  const data = [];
+
+  $(table)
+    .find("tr")
+    .each((i, row) => {
+      const rowData = [];
+      $(row)
+        .find("td")
+        .each((j, cell) => {
+          rowData.push($(cell).text().trim());
+        });
+      data.push(rowData);
+    });
+  return data;
+}
+
+async function makeRequest({ requestType = "get", data = {} } = {}) {
   let url = "https://apps.es.vt.edu/ssb/HZSKVTSC.P_ProcRequest";
 
   let headers = {
-    "User-Agent": "Axios 0.21.1",
+    "User-Agent": `${axios.VERSION}`,
     "Accept-Encoding": "gzip, deflate",
     Accept: "*/*",
     Connection: "keep-alive",
-    "Content-Length": "115",
+    // "Content-Length": "115",
     "Content-Type": "application/x-www-form-urlencoded",
   };
 
   if (requestType == "post") {
-    axios
-      .post(url, data, {
-        headers: headers,
-      })
-      .then(
-        (response) => {
-          console.log(response.data);
-        },
-        (error) => {
-          throw new Error(`${error}`);
-        }
-      );
-
-    return request.text();
+    const response = await axios.post(url, data, {
+      headers: headers,
+    });
+    return response.data;
   } else if (requestType == "get") {
-    axios.get(url).then(
-      (response) => {
-        console.log(response.data);
-      },
-      (error) => {
-        throw new Error(`${error}`);
-      }
-    );
-
-    return getRequest.text();
+    const response = await axios.get(url);
+    return response.data;
   } else {
     throw new Error("Invalid request type");
   }
 }
 
-export { getCRN, Semester };
+export { getSemesters, getSubjects, getCRN, Semester };
