@@ -1,16 +1,16 @@
 import axios from "axios";
 import cheerio from "cheerio";
-import fs from "fs";
+// import fs from "fs";
 
 //API to get the course information from va tech.
 //Class for campus type.
-var Campus = {
+let Campus = {
   BLACKSBURG: "0",
   VIRTUAL: "10",
 };
 
 //Class for day of the week course is.
-var Day = {
+let Day = {
   MONDAY: "Monday",
   TUESDAY: "Tuesday",
   WEDNESDAY: "Wednesday",
@@ -22,7 +22,7 @@ var Day = {
 };
 
 //Class for the modality of the course
-var Modality = {
+let Modality = {
   ALL: "%",
   IN_PERSON: "A",
   HYBRID: "H",
@@ -31,7 +31,7 @@ var Modality = {
 };
 
 //Class for the pathways the course staisfies.
-var Pathway = {
+let Pathway = {
   ALL: "AR%",
   CLE_1: "AR01",
   CLE_2: "AR02",
@@ -53,14 +53,14 @@ var Pathway = {
 };
 
 //Used to get information about the semester
-var Semester = {
+let Semester = {
   SPRING: "01",
   SUMMER: "06",
   FALL: "09",
   WINTER: "12",
 };
 
-var SectionType = {
+let SectionType = {
   ALL: "%",
   INDEPENDENT_STUDY: "%I%",
   LAB: "%B%",
@@ -71,14 +71,14 @@ var SectionType = {
 };
 
 //Used to see if the class is open or not
-var Status = {
+let Status = {
   ALL: "",
   OPEN: "on",
 };
 
 //Used as a container for information about vt courses
 class Course {
-  _section_type_dct = {
+  _section_type_dct: any = {
     I: SectionType.INDEPENDENT_STUDY,
     B: SectionType.LAB,
     L: SectionType.LECTURE,
@@ -87,14 +87,14 @@ class Course {
     O: SectionType.ONLINE,
   };
 
-  _modality_dct = {
+  _modality_dct: any = {
     "Face-to-Face Instruction": Modality.IN_PERSON,
     "Hybrid (F2F & Online Instruc.)": Modality.HYBRID,
     "Online with Synchronous Mtgs.": Modality.ONLINE_SYNC,
     "Online: Asynchronous": Modality.ONLINE_ASYNC,
   };
 
-  _day_dct = {
+  _day_dct: any = {
     M: Day.MONDAY,
     T: Day.TUESDAY,
     W: Day.WEDNESDAY,
@@ -105,7 +105,7 @@ class Course {
     "(ARR)": Day.ARRANGED,
   };
 
-  _course_data = {};
+  _course_data: any = {};
 
   /*
     Args:
@@ -122,7 +122,12 @@ class Course {
             Optional `pandas.Series` representing the days and times of
             additional classes scraped from the timetable.
     */
-  constructor(year, semester, timetable_data, extra_class_data) {
+  constructor(
+    year: any,
+    semester: any,
+    timetable_data: any[],
+    extra_class_data: any[] | null
+  ) {
     const array = [...timetable_data[1].matchAll(/(.+)-(.+)/g)];
 
     let subject = array[0][1];
@@ -156,7 +161,7 @@ class Course {
       modality = null;
     }
 
-    let class_dct = {};
+    let class_dct: any = {};
 
     let courseTimesSplit = timetable_data[8].split(" ");
     for (let i = 0; i < courseTimesSplit.length; i++) {
@@ -275,7 +280,7 @@ class Course {
 }
 
 //Returns a single course if it exists with this crn otherwise nothing.
-async function getCRN(year, semester, crn) {
+async function getCRN(year: any, semester: any, crn: any) {
   let crn_search = await searchTimetable({
     year: year,
     semester: semester,
@@ -293,7 +298,7 @@ async function getSemesters() {
       timetable. The first element of each tuple is the semester, and the
       second element of each tuple is the year.
   */
-  let semester_dct = {
+  let semester_dct: any = {
     Spring: Semester.SPRING,
     Summer: Semester.SUMMER,
     Fall: Semester.FALL,
@@ -301,12 +306,12 @@ async function getSemesters() {
   };
 
   let semestersRegexMatches = [
-    ...(await makeRequest({ request_type: "GET" })).matchAll(
+    ...(await makeRequest({ requestType: "GET" })).matchAll(
       /<OPTION VALUE="\d{6}">([A-Z][a-z]+) (\d+)<\/OPTION>/g
     ),
   ];
 
-  let semesters = [];
+  let semesters: any[][] = [];
   semestersRegexMatches.forEach((e) => {
     semesters.push([semester_dct[e[1]], e[2]]);
   });
@@ -324,12 +329,12 @@ async function getSubjects() {
  */
 
   let subjectRegexMatches = [
-    ...(await makeRequest({ request_type: "GET" })).matchAll(
+    ...(await makeRequest({ requestType: "GET" })).matchAll(
       /"([A-Z]+) - (.+?)"/g
     ),
   ];
 
-  let subjects = [];
+  let subjects: any[][] = [];
   subjectRegexMatches.forEach((e) => {
     subjects.push([e[1], e[2]]);
   });
@@ -338,8 +343,8 @@ async function getSubjects() {
 }
 
 async function searchTimetable({
-  year,
-  semester,
+  year = new Date().getFullYear().valueOf(),
+  semester = `${Semester.WINTER}`,
   campus = Campus.BLACKSBURG,
   pathway = Pathway.ALL,
   subject = "",
@@ -350,7 +355,7 @@ async function searchTimetable({
   modality = Modality.ALL,
 } = {}) {
   //Setting the correct term year
-  var term_year = 0;
+  let term_year: any = 0;
   if (semester == Semester.WINTER) {
     term_year = year - 1 + semester;
   } else {
@@ -407,18 +412,18 @@ async function searchTimetable({
   return course_list;
 }
 
-function readHtml(request) {
+function readHtml(request: string | any[]) {
   // parse the html file into a DOM object and then use jQuery to select the table element
   const $ = cheerio.load(request);
   const table = $("table").get(4);
 
   // convert the table to a 2D array
-  const data = [];
+  const data: any[][] = [];
 
   $(table)
     .find("tr")
     .each((i, row) => {
-      const rowData = [];
+      const rowData: string[] = [];
       $(row)
         .find("td")
         .each((j, cell) => {
