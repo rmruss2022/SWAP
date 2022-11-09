@@ -382,7 +382,7 @@ async function searchTimetable({
     return [];
   }
 
-  // write to file
+  // // write to file
   // fs.writeFile("./Test/outJs.html", request, function (err) {
   //   if (err) {
   //     return console.log(err);
@@ -445,7 +445,24 @@ async function makeRequest({ requestType = "get", data = {} } = {}) {
     const response = await axios.post(url, data, {
       headers: headers,
     });
-    return response.data;
+
+    let dataTextVal = response.data;
+
+    if (dataTextVal.includes("THERE IS AN ERROR WITH YOUR REQUEST")) {
+      throw new Error("The search parameters provided were invalid");
+    }
+    if (dataTextVal.includes("There was a problem with your request")) {
+      if (dataTextVal.includes("NO SECTIONS FOUND FOR THIS INQUIRY")) {
+        return "";
+      } else {
+        let course_not_found_message = [
+          ...dataTextVal.matchAll(/<b class=red_msg><li>(.+)<\/b>/gi),
+        ];
+        throw new Error(course_not_found_message[0][1]);
+      }
+    }
+
+    return dataTextVal;
   } else if (requestType == "get") {
     const response = await axios.get(url);
     return response.data;
@@ -454,4 +471,4 @@ async function makeRequest({ requestType = "get", data = {} } = {}) {
   }
 }
 
-export { getSemesters, getSubjects, getCRN, Semester };
+export { searchTimetable, getSemesters, getSubjects, getCRN, Semester };
