@@ -3,14 +3,14 @@ import clientPromise from "../../../lib/mongodb";
 const ObjectID = require("mongodb").ObjectID;
 
 export default async function handler(req : NextApiRequest, res : NextApiResponse) {
-    const {feedback} = req.body
+    const {id, msg, successful} = req.body
     const client = await clientPromise;
     const db = client.db('SWAP')
-    const data = await db.collection('feedback').updateOne(new ObjectID(feedback._id), {
+    const data = await db.collection('feedback').updateOne({_id : new ObjectID(id)}, {
         $set : {
-            message : feedback.message,
-            submitted : feedback.submitted,
-            successfullSwap : feedback.successfullSwap
+            message : msg,
+            submitted :true,
+            successfullSwap : successful
         }
     })
     if (data) {

@@ -1,7 +1,10 @@
+import axios from 'axios'
 import React, { useState } from 'react'
 import { TbArrowsLeftRight } from 'react-icons/tb'
 import { iFeedback } from '../utils/types'
+import { BASE_URL } from '../utils/utils'
 
+const userid = '6346d05cd53a982ce15d0601'
 
 interface IProps {
     feedback: iFeedback,
@@ -11,9 +14,21 @@ interface IProps {
 const FeedbackItem = ({feedback, id}: IProps) => {
 
     const [msg, setMsg] = useState('')
+    const [successful, setSuccessful] = useState(true)
+    const [submitted, setSubmitted] = useState(false)
+    const [alert, setAlert] = useState(false)
 
-    const submitFeedback = () => {
-        console.log('submit feedback: ', msg)
+    const submitFeedback = async () => {
+        if (msg) {
+            const resp = axios.post(`${BASE_URL}/api/feedback/updateById`, {msg : msg, id: feedback._id, successful: successful})
+            setSubmitted(true)
+        } else {
+            setAlert(true)
+            setInterval(() => 
+                setAlert(false)
+            , 3000)
+        }
+        
       }
 
   return (
@@ -34,9 +49,29 @@ const FeedbackItem = ({feedback, id}: IProps) => {
               value={msg}
               onChange={(e) => setMsg(e.target.value)}
                />
+            <label className="inline-flex relative items-center mr-5 cursor-pointer mt-2">
+                    <input
+                        disabled={submitted}
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={successful}
+                        readOnly
+                    />
+                    <div
+                        onClick={() => {
+                            setSuccessful(!successful);
+                        }}
+                        className="w-11 h-6 bg-gray-200 rounded-full peer  peer-focus:ring-green-300  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"
+                    ></div>
+                    <span className="ml-2 text-md font-mono">
+                        {successful ? 'Successful SWAP' : 'Unsuccessful SWAP'}
+                    </span>
+                </label>
         </div>
         {/* submit button */}
-        <button onClick={() => submitFeedback()} className='bg-[orange] p-2 mt-2 rounded-md text-[white] hover-pointer'>Submit Feedback</button>
+        <button disabled={submitted} onClick={() => submitFeedback()} className={`${submitted ? 'bg-[#ffdb9e]' : 'bg-[orange]' } p-2 mt-2 rounded-md text-[white] hover-pointer`}>Submit Feedback</button>
+        {submitted && <div className='mt-2 bg-[#ffb8b3] text-[black] rounded-md p-2'>Thank you for Submitting Feedback!</div> }
+        {alert && <div className='mt-2 bg-[#ff7070] p-2 rounded-md'>Please enter a full feedback message!</div>}
     </div>
   )
 }

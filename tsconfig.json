@@ -15,6 +15,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "components/MatchItem.jsx", "components/Matches.jsx", "pages/Home.jsx", "middleware/mongoose.js"],
   "exclude": ["node_modules"]
 }

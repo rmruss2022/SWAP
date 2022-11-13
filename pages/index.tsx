@@ -8,7 +8,7 @@ import Feedback from '../components/Feedback'
 import Matches from '../components/Matches'
 import AddCRN from '../components/AddCRN'
 import DropCRN from '../components/DropCRN'
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import axios from 'axios'
 import { BASE_URL } from '../utils/utils'
 import { iFeedback, iMatch, iSwapTime, iRequest, iAdding, iDropping } from '../utils/types'
@@ -24,6 +24,12 @@ export async function getServerSideProps(context: any) {
 
   // query open feedbacks
   const feedbacks = await db.collection('feedback').aggregate([
+    {
+      $match: {
+        submitted: false,
+        userid: new ObjectID(userid)
+      }
+    },
     {
       $lookup: {
         from: 'request',
@@ -93,12 +99,14 @@ export async function getServerSideProps(context: any) {
   const adding : any = {}
   const dropping : any = {}
   for (let i = 0; i < requests.length; i++) {
-    console.log(requests[i])
+    console.log('request at i: ', requests[i])
     adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course']}
     dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course']}
   }
   const addingArr = Object.keys(adding).map(add => adding[add])
   const droppingArr = Object.keys(dropping).map(drop => dropping[drop])
+  console.log('dropping: ', droppingArr)
+  console.log('dropping repeats: ', dropping)
 
   // serialize 
   const serialFeedbacks = JSON.parse(JSON.stringify(feedbacks))
@@ -126,6 +134,7 @@ export var AppContext = createContext<any>(null);
 
 const Home = ({feedbacks, matches, matchTimes, adding, dropping} : IProps) => {
 
+  const appContext = useContext(AppContext);
 
   console.log(feedbacks, matches, adding, dropping, matchTimes)
   // hooks
@@ -134,21 +143,8 @@ const Home = ({feedbacks, matches, matchTimes, adding, dropping} : IProps) => {
   const [addingCRNs, setAddingCRNs] = useState(adding)
   const [droppingCRNs, setDroppingCRNs] = useState(dropping)
 
-
-
-  const removeAddedCRN = (crn : String) => {
-    return 0
-  }
-  const addAddedCRN = (crn : String) => {
-    return 0
-  }
-  const removeDroppedCRN = (crn : String) => {
-    return 0
-  }
-  // add a crn to drop, loop through all adding and make new requests
-  const addDroppedCRN = async (crn : String) => {
-    const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: userid, isAdd : false, adding: addingCRNs, crn: crn})
-    console.log('resp adddroppedcrn: ', resp)
+  // when requests are updated, call set requests to update ui with updated list of requests
+  const setRequests = async () => {
     const {data} = await axios.get(`${BASE_URL}/api/request/getByUserId?userid=${userid}`)
     const requests = data;
     // parse into adding CRN's and Dropping CRN's
@@ -164,6 +160,30 @@ const Home = ({feedbacks, matches, matchTimes, adding, dropping} : IProps) => {
     console.log('droppingarr: ', droppingArr)
     setDroppingCRNs(droppingArr)
     setAddingCRNs(addingArr)
+  }
+
+
+  const removeAddedCRN = async (crn : String) => {
+    const resp = await axios.post(`${BASE_URL}/api/request/batchRemoveFromCRN`, {userid: userid, isAdd: true, crn: crn})
+    console.log('resp adddroppedcrn: ', resp)
+    setRequests()
+  }
+  const addAddedCRN = async (crn : String) => {
+    const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: userid, isAdd : true, dropping : droppingCRNs , crn: crn})
+    console.log('resp adddroppedcrn: ', resp)
+    setRequests()
+  }
+  // add a crn to drop, loop through all adding and make new requests
+  const addDroppedCRN = async (crn : String) => {
+    const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: userid, isAdd : false, adding: addingCRNs, crn: crn})
+    console.log('resp adddroppedcrn: ', resp)
+    setRequests()
+  }
+  // remove crn from list of dropping crns
+  const removeDroppedCRN = async (crn : String) => {
+    const resp = await axios.post(`${BASE_URL}/api/request/batchRemoveFromCRN`, {userid: userid, isAdd: false, crn: crn})
+    console.log('resp removedroppedcrn: ', resp)
+    setRequests()
   }
   const updateFeedback = () => {
     return 0
@@ -181,17 +201,14 @@ const Home = ({feedbacks, matches, matchTimes, adding, dropping} : IProps) => {
     return 0;
   }
 
-  useEffect(() => {
-    console.log('dropping crns: ', droppingCRNs)
-  }, [droppingCRNs])
 
   return (
-    <div className='md:w-[750px] w-full h-full p-2'>
-      <AppContext.Provider value={droppingCRNs}>
+    <div className={`md:w-[750px] w-full h-full p-2`}>
+      <AppContext.Provider value={{dropping : droppingCRNs, adding: addingCRNs}}>
         <Feedback feedbacks={feedbacks} />
         <Matches matches={matches} matchTimes={matchTimes} />
-        <AddCRN adding={addingCRNs} addAddedCRN={addAddedCRN} removeAddedCRN={removeAddedCRN} />
-        <DropCRN dropping={droppingCRNs} addDroppedCRN={addDroppedCRN} removeDroppedCRN={removeDroppedCRN} />
+        <AddCRN addAddedCRN={addAddedCRN} removeAddedCRN={removeAddedCRN} />
+        <DropCRN addDroppedCRN={addDroppedCRN} removeDroppedCRN={removeDroppedCRN} />
       </AppContext.Provider>
     </div>
   )

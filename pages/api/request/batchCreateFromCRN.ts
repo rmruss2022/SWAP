@@ -13,7 +13,31 @@ export default async function handler(req : NextApiRequest, res : NextApiRespons
     
     // if crn is meant to add
     if (isAdd) {
-
+        // create requests for each added course
+        for (let i = 0; i < dropping.length; i++) {
+            await db.collection('request').insertOne({
+                userid: new ObjectID(userid),
+                drop_crn : dropping[i].crn,
+                add_crn : crn,
+                alive : true,
+                add_classtitle: 'fetch class title',
+                add_course : 'fetch course',
+                drop_classtitle : dropping[i].title,
+                drop_course : dropping[i].course,
+            })
+            if (dropping.length < 1) {
+                await db.collection('request').insertOne({
+                    userid: new ObjectID(userid),
+                    drop_crn : 'placeholder',
+                    add_crn : crn,
+                    alive : true,
+                    add_classtitle: 'fetch class title',
+                    add_course : 'fetch course',
+                    drop_classtitle : 'placeholder',
+                    drop_course : 'placeholder',
+                })
+            }
+        } 
     } // else crn is meant to drop
     else {
         // create requests for each added course
@@ -29,6 +53,18 @@ export default async function handler(req : NextApiRequest, res : NextApiRespons
                 drop_course : 'temp course'
             })
         } 
+        if (adding.length < 1) {
+            await db.collection('request').insertOne({
+                userid: new ObjectID(userid),
+                drop_crn : crn,
+                add_crn : 'placeholder',
+                alive : true,
+                add_classtitle: 'placeholder',
+                add_course : 'placeholder',
+                drop_classtitle : 'temp title',
+                drop_course : 'temp course'
+            })
+        }
     }
       
     res.status(200).json('success')
