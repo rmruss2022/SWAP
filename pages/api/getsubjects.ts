@@ -1,18 +1,17 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getCRN } from "../../utils/courses";
+import { getSubjects } from "../../utils/courses";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   if (req.method == "GET") {
-    const { year, semester, crn } = req.query;
     try {
-      var course = await getCRN(year, semester, crn);
-      if (course) {
-        res.status(200).send({ course: course });
+      var subjects = await getSubjects();
+      if (subjects) {
+        res.status(200).send({ subjects: subjects });
       } else {
-        res.status(400).send({ message: "Course Not Found!" });
+        res.status(400).send({ message: "No subjects found!" });
       }
     } catch (error: any) {
       // we'll proceed, but let's report it
