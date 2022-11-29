@@ -13,6 +13,8 @@ import axios from 'axios'
 import { BASE_URL } from '../utils/utils'
 import { iFeedback, iMatch, iSwapTime, iRequest, iAdding, iDropping } from '../utils/types'
 import { request } from 'http'
+import { time } from 'console'
+import { match } from 'assert'
 const ObjectID = require("mongodb").ObjectID;
 
 const userid = '6346d05cd53a982ce15d0601'
@@ -90,8 +92,28 @@ export async function getServerSideProps(context: any) {
   // query times for each match
   const matchTimes : any = {}
   for (let i = 0; i < matches.length; i++) {
-    const times = await db.collection('swaptime').find({match: new ObjectID(matches[i]['_id']) }).toArray();
-    matchTimes[`${matches[i]['_id']}`] = times
+    matchTimes[`${matches[i]['_id'].toString()}`] = {}
+    const times = await db.collection('swaptime').aggregate([
+      {
+        $match :{match: matches[i]['_id']}
+      },
+      {
+        $lookup: 
+        {
+          from: "user",
+          localField: "userid",
+          foreignField: "_id",
+          as: "user"
+        }
+      }]).toArray()
+    
+    for (let j = 0; j < times.length; j++) {
+      if (times[j]['userid'].toString() !== userid) {
+        matchTimes[`${matches[i]['_id'].toString()}`]['partnerTime'] = times[j]
+      } else {
+        matchTimes[`${matches[i]['_id'].toString()}`]['userTime'] = times[j]
+      }
+    }
   }
   // query requests
   const requests = await db.collection('request').find({userid : new ObjectID(userid)}).toArray();
@@ -99,14 +121,14 @@ export async function getServerSideProps(context: any) {
   const adding : any = {}
   const dropping : any = {}
   for (let i = 0; i < requests.length; i++) {
-    console.log('request at i: ', requests[i])
+    // console.log('request at i: ', requests[i])
     adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course']}
     dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course']}
   }
   const addingArr = Object.keys(adding).map(add => adding[add])
   const droppingArr = Object.keys(dropping).map(drop => dropping[drop])
-  console.log('dropping: ', droppingArr)
-  console.log('dropping repeats: ', dropping)
+  // console.log('dropping: ', droppingArr)
+  // console.log('dropping repeats: ', dropping)
 
   // serialize 
   const serialFeedbacks = JSON.parse(JSON.stringify(feedbacks))
@@ -135,7 +157,7 @@ export var AppContext = createContext<any>(null);
 const Home = ({feedbacks, matches, matchTimes, adding, dropping} : IProps) => {
 
   const appContext = useContext(AppContext);
-
+console.log('matche times: ', matchTimes)
   console.log(feedbacks, matches, adding, dropping, matchTimes)
   // hooks
   const [feedbacksState, setFeedbacksState] = useState(feedbacks)

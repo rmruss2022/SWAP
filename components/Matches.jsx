@@ -4,11 +4,11 @@ import MatchItem from './MatchItem'
 
 const Matches = ({matches, matchTimes}) => {
     
-
+  console.log('match times: ', matchTimes)
   return (
     <>
-    {matches.map((match , idx) => (
-        <MatchItem key={idx} match={match} id={idx} matchTime={matchTimes[match]} />
+    {matches.map((match, idx) => (
+        <MatchItem key={idx} match={match} matchTime={matchTimes[match._id]} />
     ))}
     </>
   )
