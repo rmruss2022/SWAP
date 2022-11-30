@@ -164,6 +164,7 @@ console.log('matche times: ', matchTimes)
   const [matchesState, setMatchesState] = useState([])
   const [addingCRNs, setAddingCRNs] = useState(adding)
   const [droppingCRNs, setDroppingCRNs] = useState(dropping)
+  const [userid, setUserID] = useState('6346d05cd53a982ce15d0601')
 
   // when requests are updated, call set requests to update ui with updated list of requests
   const setRequests = async () => {
@@ -226,7 +227,7 @@ console.log('matche times: ', matchTimes)
 
   return (
     <div className={`md:w-[750px] w-full h-full p-2`}>
-      <AppContext.Provider value={{dropping : droppingCRNs, adding: addingCRNs}}>
+      <AppContext.Provider value={{dropping : droppingCRNs, adding: addingCRNs, userid: [userid, setUserID]}}>
         <Feedback feedbacks={feedbacks} />
         <Matches matches={matches} matchTimes={matchTimes} />
         <AddCRN addAddedCRN={addAddedCRN} removeAddedCRN={removeAddedCRN} />
