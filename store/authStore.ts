@@ -9,11 +9,7 @@ interface StoreUser {
     image: string,
     role: string,
     _id: string,
-    _type: string,
     email: string,
-    _createdAt: string,
-    contributedprojects : string[],
-    token : string
 }
 
 

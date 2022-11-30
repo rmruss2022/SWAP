@@ -8,7 +8,7 @@ export default async function handler(
   if (req.method == "GET") {
     const { year, semester, crn } = req.query;
     try {
-      var course = await getCRN(year, semester, crn);
+      var course = ''//await getCRN(year);
       if (course) {
         res.status(200).send({ course: course });
       } else {

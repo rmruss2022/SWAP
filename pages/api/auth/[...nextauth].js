@@ -20,7 +20,7 @@ export default NextAuth({
             console.log('user ressp: ', resp)
             const isAllowedToSignIn = true
             if (isAllowedToSignIn) {
-                return user
+                return resp
             } else {
                 // Return false to display a default error message
                 return false

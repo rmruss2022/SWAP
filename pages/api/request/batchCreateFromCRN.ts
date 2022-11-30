@@ -11,9 +11,13 @@ export default async function handler(req : NextApiRequest, res : NextApiRespons
 
     console.log(crn, adding, userid)
 
-    var course = await getCRN('2022', 'Fall', 80220);
-    console.log('course: ', course)
+    // SPRING: "01",
+    // SUMMER: "06",
+    // FALL: "09",
+    // WINTER: "12",
     // query course info from api
+    const course = getCRN(2022, '12', crn)
+
     
     // if crn is meant to add
     if (isAdd) {
@@ -73,10 +77,5 @@ export default async function handler(req : NextApiRequest, res : NextApiRespons
       
     res.status(200).json('success')
 }
-
-const findCourse = async (year: String, semester: String, crn : String) => {
-      var course = await getCRN(year, semester, crn);
-      return course
-} 
 
 

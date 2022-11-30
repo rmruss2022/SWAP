@@ -16,6 +16,7 @@ import { request } from 'http'
 import { time } from 'console'
 import { match } from 'assert'
 const ObjectID = require("mongodb").ObjectID;
+import { useSession } from "next-auth/react"
 
 const userid = '6346d05cd53a982ce15d0601'
 
@@ -165,7 +166,7 @@ console.log('matche times: ', matchTimes)
   const [addingCRNs, setAddingCRNs] = useState(adding)
   const [droppingCRNs, setDroppingCRNs] = useState(dropping)
   const [userid, setUserID] = useState('6346d05cd53a982ce15d0601')
-
+  const { data: session } = useSession()
   // when requests are updated, call set requests to update ui with updated list of requests
   const setRequests = async () => {
     const {data} = await axios.get(`${BASE_URL}/api/request/getByUserId?userid=${userid}`)
@@ -224,17 +225,23 @@ console.log('matche times: ', matchTimes)
     return 0;
   }
 
+  if (session) { 
 
-  return (
-    <div className={`md:w-[750px] w-full h-full p-2`}>
-      <AppContext.Provider value={{dropping : droppingCRNs, adding: addingCRNs, userid: [userid, setUserID]}}>
-        <Feedback feedbacks={feedbacks} />
-        <Matches matches={matches} matchTimes={matchTimes} />
-        <AddCRN addAddedCRN={addAddedCRN} removeAddedCRN={removeAddedCRN} />
-        <DropCRN addDroppedCRN={addDroppedCRN} removeDroppedCRN={removeDroppedCRN} />
-      </AppContext.Provider>
-    </div>
-  )
+    return (
+      <div className={`md:w-[750px] w-full h-full p-2`}>
+        <AppContext.Provider value={{dropping : droppingCRNs, adding: addingCRNs}}>
+          <Feedback feedbacks={feedbacks} />
+          <Matches matches={matches} matchTimes={matchTimes} />
+          <AddCRN addAddedCRN={addAddedCRN} removeAddedCRN={removeAddedCRN} />
+          <DropCRN addDroppedCRN={addDroppedCRN} removeDroppedCRN={removeDroppedCRN} />
+        </AppContext.Provider>
+      </div>
+    )
+  } else {
+    return(
+      <p>Please sign in with your Virginia Tech Email!</p>
+    )
+  }
 }
 
 export default Home
