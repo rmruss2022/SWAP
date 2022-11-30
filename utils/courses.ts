@@ -1,6 +1,5 @@
 import axios from "axios";
 import cheerio from "cheerio";
-// import fs from "fs";
 
 //API to get the course information from va tech.
 //Class for campus type.
@@ -280,7 +279,11 @@ class Course {
 }
 
 //Returns a single course if it exists with this crn otherwise nothing.
-async function getCRN(year: any, semester: any, crn: any) {
+async function getCRN({
+  year = undefined,
+  semester = undefined,
+  crn = undefined,
+} = {}) {
   let crn_search = await searchTimetable({
     year: year,
     semester: semester,
@@ -306,7 +309,7 @@ async function getSemesters() {
   };
 
   let semestersRegexMatches = [
-    ...(await makeRequest({ requestType: "GET" })).matchAll(
+    ...(await makeRequest()).matchAll(
       /<OPTION VALUE="\d{6}">([A-Z][a-z]+) (\d+)<\/OPTION>/g
     ),
   ];
@@ -329,9 +332,7 @@ async function getSubjects() {
  */
 
   let subjectRegexMatches = [
-    ...(await makeRequest({ requestType: "GET" })).matchAll(
-      /"([A-Z]+) - (.+?)"/g
-    ),
+    ...(await makeRequest()).matchAll(/"([A-Z]+) - (.+?)"/g),
   ];
 
   let subjects: any[][] = [];
@@ -387,18 +388,10 @@ async function searchTimetable({
     return [];
   }
 
-  // // write to file
-  // fs.writeFile("./Test/outJs.html", request, function (err) {
-  //   if (err) {
-  //     return console.log(err);
-  //   }
-  //   console.log("The file was saved!");
-  // });
-
   let request_data = readHtml(request);
 
   let course_list = [];
-  // console.log(request_data);
+
   for (let i = 1; i < request_data.length; i++) {
     course_list.push(
       new Course(
@@ -442,7 +435,6 @@ async function makeRequest({ requestType = "get", data = {} } = {}) {
     "Accept-Encoding": "gzip, deflate",
     Accept: "*/*",
     Connection: "keep-alive",
-    // "Content-Length": "115",
     "Content-Type": "application/x-www-form-urlencoded",
   };
 
@@ -476,4 +468,4 @@ async function makeRequest({ requestType = "get", data = {} } = {}) {
   }
 }
 
-export { searchTimetable, getSemesters, getSubjects, getCRN, Semester };
+export { searchTimetable, getSemesters, getSubjects, getCRN };
