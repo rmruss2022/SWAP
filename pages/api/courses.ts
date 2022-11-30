@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getCRN } from "../../utils/courses";
 
+// no chnge git push
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
