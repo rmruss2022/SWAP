@@ -1,22 +1,3 @@
-<<<<<<< HEAD
-import clientPromise from '../lib/mongodb'
-import { InferGetServerSidePropsType } from 'next'
-import Image from 'next/image'
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
-import Feedback from '../components/Feedback'
-import Matches from '../components/Matches'
-import AddCRN from '../components/AddCRN'
-import DropCRN from '../components/DropCRN'
-import { createContext, useContext, useEffect, useState } from 'react'
-import axios from 'axios'
-import { BASE_URL } from '../utils/utils'
-import { iFeedback, iMatch, iSwapTime, iRequest, iAdding, iDropping } from '../utils/types'
-import { request } from 'http'
-import { time } from 'console'
-import { match } from 'assert'
-=======
 import clientPromise from "../lib/mongodb";
 import { InferGetServerSidePropsType } from "next";
 import Image from "next/image";
@@ -39,7 +20,6 @@ import {
   iDropping,
 } from "../utils/types";
 import { request } from "http";
->>>>>>> a51c8e554d9f45c96c5f52b1dce929a2899ce0e1
 const ObjectID = require("mongodb").ObjectID;
 
 const userid = "6346d05cd53a982ce15d0601";
@@ -117,36 +97,11 @@ export async function getServerSideProps(context: any) {
   // query times for each match
   const matchTimes: any = {};
   for (let i = 0; i < matches.length; i++) {
-<<<<<<< HEAD
-    matchTimes[`${matches[i]['_id'].toString()}`] = {}
-    const times = await db.collection('swaptime').aggregate([
-      {
-        $match :{match: matches[i]['_id']}
-      },
-      {
-        $lookup: 
-        {
-          from: "user",
-          localField: "userid",
-          foreignField: "_id",
-          as: "user"
-        }
-      }]).toArray()
-    
-    for (let j = 0; j < times.length; j++) {
-      if (times[j]['userid'].toString() !== userid) {
-        matchTimes[`${matches[i]['_id'].toString()}`]['partnerTime'] = times[j]
-      } else {
-        matchTimes[`${matches[i]['_id'].toString()}`]['userTime'] = times[j]
-      }
-    }
-=======
     const times = await db
       .collection("swaptime")
       .find({ match: new ObjectID(matches[i]["_id"]) })
       .toArray();
     matchTimes[`${matches[i]["_id"]}`] = times;
->>>>>>> a51c8e554d9f45c96c5f52b1dce929a2899ce0e1
   }
   // query requests
   const requests = await db
@@ -157,16 +112,6 @@ export async function getServerSideProps(context: any) {
   const adding: any = {};
   const dropping: any = {};
   for (let i = 0; i < requests.length; i++) {
-<<<<<<< HEAD
-    // console.log('request at i: ', requests[i])
-    adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course']}
-    dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course']}
-  }
-  const addingArr = Object.keys(adding).map(add => adding[add])
-  const droppingArr = Object.keys(dropping).map(drop => dropping[drop])
-  // console.log('dropping: ', droppingArr)
-  // console.log('dropping repeats: ', dropping)
-=======
     console.log("request at i: ", requests[i]);
     adding[requests[i]["add_crn"]] = {
       crn: requests[i]["add_crn"],
@@ -183,7 +128,6 @@ export async function getServerSideProps(context: any) {
   const droppingArr = Object.keys(dropping).map((drop) => dropping[drop]);
   console.log("dropping: ", droppingArr);
   console.log("dropping repeats: ", dropping);
->>>>>>> a51c8e554d9f45c96c5f52b1dce929a2899ce0e1
 
   // serialize
   const serialFeedbacks = JSON.parse(JSON.stringify(feedbacks));
@@ -211,13 +155,8 @@ export var AppContext = createContext<any>(null);
 
 const Home = ({ feedbacks, matches, matchTimes, adding, dropping }: IProps) => {
   const appContext = useContext(AppContext);
-<<<<<<< HEAD
-console.log('matche times: ', matchTimes)
-  console.log(feedbacks, matches, adding, dropping, matchTimes)
-=======
 
   console.log(feedbacks, matches, adding, dropping, matchTimes);
->>>>>>> a51c8e554d9f45c96c5f52b1dce929a2899ce0e1
   // hooks
   const [feedbacksState, setFeedbacksState] = useState(feedbacks);
   const [matchesState, setMatchesState] = useState([]);
