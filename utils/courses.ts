@@ -314,9 +314,13 @@ async function getSemesters() {
     ),
   ];
 
-  let semesters: any[][] = [];
+  let semesters: any[] = [];
   semestersRegexMatches.forEach((e) => {
-    semesters.push([semester_dct[e[1]], e[2]]);
+    semesters.push({
+      semester: e[1],
+      semesterNum: semester_dct[e[1]],
+      year: e[2],
+    });
   });
 
   return semesters;
