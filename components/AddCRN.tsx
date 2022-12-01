@@ -2,6 +2,9 @@ import React, { useContext, useState } from 'react'
 import {FaTrash} from 'react-icons/fa'
 import { AppContext } from '../pages'
 import { iAdding } from '../utils/types'
+import {AiFillQuestionCircle} from 'react-icons/ai'
+import Link from 'next/link'
+import { motion } from "framer-motion"
 
 interface IProps {
     addAddedCRN: any,
@@ -15,8 +18,20 @@ const AddCRN = ({addAddedCRN, removeAddedCRN} :  IProps) => {
   return (
     <div className='flex-col mb-3 border-[gray-100] border-2 rounded-xl p-3'>
         {/* title */}
-        <div className='pb-3'>
+        <div className='pb-3 flex flex-wrap justify-between gap-2 cursor-pointer'>
             <p className='text-2xl font-mono underline'>CRNs to Add</p>
+            <a target="_blank" href='https://apps.es.vt.edu/ssb/HZSKVTSC.P_DispRequest' rel="noopener noreferrer">
+                <AiFillQuestionCircle size={27} />
+            </a>
+        </div>
+        {/* semesterYears.map(semYr => )                  select year and semester */}
+        <div className='flex flex-wrap gap-6'>
+            <button className='w-[185px] h-[45px] border-2 rounded-md mt-0 mb-3 jusitfy-center items-center border-[#3661e3] bg-[#3661e3]'>
+                <p>Winter 2023</p>
+            </button>
+            <motion.button className='w-[185px] h-[45px] border-2 rounded-md mt-0 mb-3 jusitfy-center items-center border-[#3661e3]'>
+                <p>Spring 2023</p>
+            </motion.button>
         </div>
         {/* form: add by crn */}
         <div className='flex gap-6 items-center pb-4'>

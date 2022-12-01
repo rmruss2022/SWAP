@@ -1,22 +1,26 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "../../../lib/mongodb";
-import { getCRN } from "../../../utils/courses";
+import { getCRN, getSemesters } from "../../../utils/courses";
 const ObjectID = require("mongodb").ObjectID;
 
+interface course {
+    crn : string,
+    title: string,
+    course: string
+}
 
 export default async function handler(req : NextApiRequest, res : NextApiResponse) {
-    const {crn, isAdd, adding, dropping, userid} = req.body
+    const {crn, isAdd, adding, dropping, userid, semester, year, semeseter} = req.body
     const client = await clientPromise;
     const db = client.db('SWAP')
 
     console.log(crn, adding, userid)
 
-    // SPRING: "01",
-    // SUMMER: "06",
-    // FALL: "09",
-    // WINTER: "12",
-    // query course info from api
-    const course = getCRN(2022, '12', crn)
+    // query available semesters
+
+    // query course info for each semester
+    
+    const course : any = await getCRN(year, semester, crn)
 
     
     // if crn is meant to add
@@ -26,10 +30,10 @@ export default async function handler(req : NextApiRequest, res : NextApiRespons
             await db.collection('request').insertOne({
                 userid: new ObjectID(userid),
                 drop_crn : dropping[i].crn,
-                add_crn : crn,
+                add_crn : course.crn,
                 alive : true,
-                add_classtitle: 'fetch class title',
-                add_course : 'fetch course',
+                add_classtitle: course.title,
+                add_course : course.course,
                 drop_classtitle : dropping[i].title,
                 drop_course : dropping[i].course,
             })

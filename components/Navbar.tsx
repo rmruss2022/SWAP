@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import Image from 'next/image';
 import Link from 'next/link'
 import Router, { useRouter } from 'next/router';
@@ -8,12 +8,13 @@ import Logo from '../public/Swap-navbar-logo-01.png'
 import { useSession, signIn, signOut } from "next-auth/react"
 import { BASE_URL } from '../utils/utils';
 import axios from 'axios';
+import { AuthenticatedContex } from '../pages/_app';
 
 const Navbar = () => {
 
     const {userProfile, addUser, removeUser} = useAuthStore();
     const { data: session } = useSession()
-
+    const authenticatedContex = useContext(AuthenticatedContex)
 
     async function addUserToStore() {
         console.log('adding user to store')
@@ -29,12 +30,14 @@ const Navbar = () => {
         }
         if (session && userProfile == null) {
             addUserToStore()
+            authenticatedContex.setUser('set user')
         }
         
     }, [session, userProfile])
 
     return (
         <div className='w-full flex justify-between items-center border-b-2 border-gray-200 py-2 px-4'>
+            <p>{authenticatedContex.user}</p>
             <Link href='/'>
                 <div className='w-[100px] md:w-[130px]'>
                     <Image draggable='false' className='cursor-pointer' src={Logo} layout='responsive' />
