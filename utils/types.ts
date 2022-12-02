@@ -10,6 +10,14 @@ export interface iRequest {
     drop_course : String
 }
 
+export interface iUser {
+    _id : String,
+    email : String,
+    name : String,
+    image : String,
+    role : String
+}
+
 export interface iMatch {
     _id : String,
     alive : String,
@@ -48,4 +56,9 @@ export interface iDropping {
     crn: String,
     title : String,
     course : String
+}
+export interface iSemester {
+    semester: String,
+    semesterNum : String,
+    year : String
 }

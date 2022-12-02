@@ -13,23 +13,20 @@ export default async function handler(req : NextApiRequest, res : NextApiRespons
     // query course info from api
     
     // if crn is meant to add
+    var resp;
     if (isAdd) {
-        const resp = await db.collection('request').deleteMany({add_crn : crn, userid: new ObjectID(userid)})
+        resp = await db.collection('request').deleteMany({add_crn : crn, userid: new ObjectID(userid)})
         console.log('mongo resp: ', resp)
-        if (resp.deletedCount > 0) {
-            res.status(200).json({'deleted: ' : resp.deletedCount})
-        }
+        
     } // else crn is meant to drop
     else {
         // delete requests for each added course
-        const resp = await db.collection('request').deleteMany({drop_crn : crn, userid: new ObjectID(userid)})
+        resp = await db.collection('request').deleteMany({drop_crn : crn, userid: new ObjectID(userid)})
         console.log('mongo resp: ', resp)
-        if (resp.deletedCount > 0) {
-            res.status(200).json({'deleted: ' : resp.deletedCount})
-        }
+        
     }
       
-    res.status(500).json('error')
+    res.status(resp.deletedCount > 0 ? 200 : 500).json({ message : resp.deletedCount > 0 ? resp.deletedCount : 'error nothing to delete'})
 }
 
 

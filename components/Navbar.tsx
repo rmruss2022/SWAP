@@ -20,24 +20,24 @@ const Navbar = () => {
         console.log('adding user to store')
         const resp = await axios.post(`${BASE_URL}/api/user/createUser`, {name: session!.user?.name, email: session!.user?.email, image: session!.user?.image})
         addUser(resp.data)
+        authenticatedContex.setUser(resp.data)
     }
     React.useEffect(() => {
         console.log('session: ',session)
         console.log('user profile: ', userProfile)
+        console.log('user profile auth: ', authenticatedContex.user)
         if (session == null) {
             removeUser();
             return
         }
         if (session && userProfile == null) {
             addUserToStore()
-            authenticatedContex.setUser('set user')
         }
         
-    }, [session, userProfile])
+    }, [session, userProfile, authenticatedContex.user])
 
     return (
-        <div className='w-full flex justify-between items-center border-b-2 border-gray-200 py-2 px-4'>
-            <p>{authenticatedContex.user}</p>
+        <div className='w-full flex justify-between items-center border-b-2 border-gray-200 pt-2 px-4'>
             <Link href='/'>
                 <div className='w-[100px] md:w-[130px]'>
                     <Image draggable='false' className='cursor-pointer' src={Logo} layout='responsive' />

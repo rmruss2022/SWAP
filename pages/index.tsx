@@ -11,7 +11,7 @@ import DropCRN from '../components/DropCRN'
 import { createContext, useContext, useEffect, useState } from 'react'
 import axios from 'axios'
 import { BASE_URL } from '../utils/utils'
-import { iFeedback, iMatch, iSwapTime, iRequest, iAdding, iDropping } from '../utils/types'
+import { iFeedback, iMatch, iSwapTime, iRequest, iAdding, iDropping, iSemester } from '../utils/types'
 import { request } from 'http'
 import { time } from 'console'
 import { match } from 'assert'
@@ -25,6 +25,9 @@ export async function getServerSideProps(context: any) {
   const client = await clientPromise;
   const db = client.db("SWAP");
 
+  const semData = await axios.get(`${BASE_URL}/api/getsemesters`)
+  const semesters = semData.data
+  console.log('semesters: ', semesters)
   // query open feedbacks
   const feedbacks = await db.collection('feedback').aggregate([
     {
@@ -123,8 +126,12 @@ export async function getServerSideProps(context: any) {
   const dropping : any = {}
   for (let i = 0; i < requests.length; i++) {
     // console.log('request at i: ', requests[i])
-    adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course']}
-    dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course']}
+    if (requests[i]['add_crn'] !== 'null') {
+      adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course']}
+    }
+    if (requests[i]['drop_crn'] !== 'null') {
+      dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course']}
+    }
   }
   const addingArr = Object.keys(adding).map(add => adding[add])
   const droppingArr = Object.keys(dropping).map(drop => dropping[drop])
@@ -142,6 +149,7 @@ export async function getServerSideProps(context: any) {
         matchTimes : serialMatchTimes,
         adding : addingArr,
         dropping: droppingArr,
+        semesters : semesters
        },
     }
   }
@@ -151,11 +159,12 @@ interface IProps {
   matches: [iMatch],
   matchTimes : [iSwapTime],
   adding : [iAdding],
-  dropping: [iDropping]
+  dropping: [iDropping],
+  semesters : [iSemester]
 }
 export var AppContext = createContext<any>(null);
 
-const Home = ({feedbacks, matches, matchTimes, adding, dropping} : IProps) => {
+const Home = ({feedbacks, matches, matchTimes, adding, dropping, semesters} : IProps) => {
 
   const appContext = useContext(AppContext);
  
@@ -176,9 +185,14 @@ console.log('matche times: ', matchTimes)
     const adding : any = {}
     const dropping : any = {}
     for (let i = 0; i < requests.length; i++) {
-      console.log(requests[i])
-      adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course']}
+      console.log('requests add_crn', requests[i]['add_crn'])
+
+      if (requests[i]['add_crn'] !== 'null') {
+        adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course']}
+      }
+      if (requests[i]['drop_crn'] !== 'null') {
       dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course']}
+      }
     }
     const addingArr : any = Object.keys(adding).map(add => adding[add])
     const droppingArr : any = Object.keys(dropping).map(drop => dropping[drop])
@@ -193,10 +207,15 @@ console.log('matche times: ', matchTimes)
     console.log('resp adddroppedcrn: ', resp)
     setRequests()
   }
-  const addAddedCRN = async (crn : String) => {
-    const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: userid, isAdd : true, dropping : droppingCRNs , crn: crn})
-    console.log('resp adddroppedcrn: ', resp)
-    setRequests()
+  const addAddedCRN = async (crn : String, semesterNum : String, year : String) => {
+    try {
+      const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: userid, isAdd : true, dropping : droppingCRNs , crn: crn, semester : semesterNum, year : year})
+      console.log('resp adddroppedcrn: ', resp)
+      setRequests()
+    } catch(error) {
+      return 'Error, incorrect CRN or Semester'
+    }
+    
   }
   // add a crn to drop, loop through all adding and make new requests
   const addDroppedCRN = async (crn : String) => {
@@ -230,7 +249,7 @@ console.log('matche times: ', matchTimes)
 
     return (
       <div className={`md:w-[750px] w-full h-full p-2`}>
-        <AppContext.Provider value={{dropping : droppingCRNs, adding: addingCRNs}}>
+        <AppContext.Provider value={{dropping : droppingCRNs, adding: addingCRNs, semesters : semesters}}>
           <Feedback feedbacks={feedbacks} />
           <Matches matches={matches} matchTimes={matchTimes} />
           <AddCRN addAddedCRN={addAddedCRN} removeAddedCRN={removeAddedCRN} />

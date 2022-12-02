@@ -1,7 +1,14 @@
-import NodeMailer from 'nodemailer'
+import nodemailer from 'nodemailer'
 
-export const sendMail = async (subject : String, recipients : String[], message: String) => {
-    const transporter = NodeMailer.createTransport({
+interface iMailOptions {
+    from : string | undefined,
+    to : (string | any)[],
+    subject : string,
+    text : string
+}
+
+export const sendMail = async (subject : string, recipients : String[], message: string) => {
+    const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
           user: process.env.NEXT_PUBLIC_MAIL,
@@ -9,7 +16,7 @@ export const sendMail = async (subject : String, recipients : String[], message:
         },
     });
 
-    const mailOptions = {
+    const mailOptions : iMailOptions = {
         from: process.env.NEXT_PUBLIC_MAIL,
         to: recipients,
         subject: subject,
