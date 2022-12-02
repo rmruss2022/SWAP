@@ -28,8 +28,8 @@ const AddCRN = ({addAddedCRN, removeAddedCRN} :  IProps) => {
         </div>
         <div className='flex flex-wrap gap-6'>
         {/* semesterYears.map(semYr => )                  select year and semester */}
-        { appContext.semesters.map((semester : iSemester) => (
-            <button onClick={() => setSelectedSemester(semester)} className={`w-[185px] h-[40px] border-2 rounded-md mt-0 mb-3 jusitfy-center items-center border-[#3661e3] bg-[${selectedSemester.semesterNum === semester.semesterNum ? '#3661e3' : 'white'}]`}>
+        { appContext.semesters.map((semester : iSemester, idx: number) => (
+            <button key={idx} onClick={() => setSelectedSemester(semester)} className={`w-[185px] h-[40px] border-2 rounded-md mt-0 mb-3 jusitfy-center items-center border-[#3661e3] bg-[${selectedSemester.semesterNum === semester.semesterNum ? '#3661e3' : 'white'}]`}>
                 <p className={`text-[${selectedSemester.semesterNum === semester.semesterNum ? 'white' : 'dark:white'}]`}>{semester.year} {semester.semester} </p>
             </button>
         )) }

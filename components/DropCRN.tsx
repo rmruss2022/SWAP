@@ -1,7 +1,9 @@
 import axios from 'axios'
+import { interpolateAs } from 'next/dist/shared/lib/router/router'
 import React, { useContext, useEffect, useState } from 'react'
 import { AiFillQuestionCircle } from 'react-icons/ai'
 import {FaTrash} from 'react-icons/fa'
+import { sortAndDeduplicateDiagnostics } from 'typescript'
 import { AppContext } from '../pages'
 import { iAdding, iDropping, iSemester } from '../utils/types'
 import { BASE_URL } from '../utils/utils'
@@ -36,8 +38,8 @@ const DropCRN = ({removeDroppedCRN, addDroppedCRN} : IProps) => {
             </a>
         </div>
         <div>
-        { appContext.semesters.map((semester : iSemester) => (
-            <button onClick={() => setSelectedSemester(semester)} className={`w-[185px] h-[40px] border-2 rounded-md mt-0 mb-3 jusitfy-center items-center border-[#3661e3] bg-[${selectedSemester.semesterNum === semester.semesterNum ? '#3661e3' : 'white'}]`}>
+        { appContext.semesters.map((semester : iSemester, idx : number) => (
+            <button key={idx} onClick={() => setSelectedSemester(semester)} className={`w-[185px] h-[40px] border-2 rounded-md mt-0 mb-3 jusitfy-center items-center border-[#3661e3] bg-[${selectedSemester.semesterNum === semester.semesterNum ? '#3661e3' : 'white'}]`}>
                 <p className={`text-[${selectedSemester.semesterNum === semester.semesterNum ? 'white' : 'dark:white'}]`}>{semester.year} {semester.semester} </p>
             </button>
         )) }
@@ -65,3 +67,5 @@ const DropCRN = ({removeDroppedCRN, addDroppedCRN} : IProps) => {
 }
 
 export default DropCRN
+
+
