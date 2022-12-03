@@ -472,4 +472,70 @@ async function makeRequest({ requestType = "get", data = {} } = {}) {
   }
 }
 
-export { searchTimetable, getSemesters, getSubjects, getCRN };
+async function getAddDropDates() {
+  const response = await axios.get(
+    "https://www.registrar.vt.edu/dates-deadlines/Drop-Add.html"
+  );
+
+  const $ = cheerio.load(response.data);
+
+  const Crse_Request_Dates = $("#text_1452489132842_1711390851")
+    .find("ul")
+    .get(0);
+
+  const Web_Add_Drop_Dates = $("#text_1452489132842_1711390851")
+    .find("table")
+    .get(0);
+
+  const data: any = {};
+
+  const CR_availability: any = {};
+  $(Crse_Request_Dates)
+    .find("li")
+    .each((i, elem) => {
+      const date = $(elem).text().trim().split(":");
+      CR_availability[date[0].trim()] = date[1].trim();
+    });
+
+  data["CR_availability"] = CR_availability;
+
+  const rows: any = $(Web_Add_Drop_Dates).find("tr");
+  const table: any = {};
+
+  const table_headers: any[] = [];
+  $(rows[0])
+    .find("th")
+    .each((i, elem) => {
+      table_headers.push($(elem).text().trim());
+    });
+
+  $(rows.slice(1)).each((i, elem) => {
+    const row_data: any = {};
+    const row: any = $(elem).find("td");
+    let keyHeader = "";
+    $(row).each((i, elem) => {
+      if (i == 0) {
+        keyHeader = $(elem).text().trim();
+      } else if (i == 1 || i == 2) {
+        let add_drop_arr: any[] = [];
+        const pTag = $(elem).find("p");
+        if (pTag.length > 0) {
+          $(pTag).each((i, val) => {
+            add_drop_arr.push($(val).text().trim());
+          });
+        } else {
+          add_drop_arr.push($(elem).text().trim());
+        }
+        row_data[table_headers[i]] = add_drop_arr;
+      } else {
+        row_data[table_headers[i]] = $(elem).text().trim();
+      }
+    });
+    table[keyHeader] = row_data;
+  });
+  data["WAD_availability"] = table;
+
+  return data;
+}
+
+export { searchTimetable, getSemesters, getSubjects, getCRN, getAddDropDates };
