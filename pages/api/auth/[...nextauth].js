@@ -12,6 +12,7 @@ export default NextAuth({
             clientSecret: process.env.NEXT_PUBLIC_GOOGLE_SECRET,
         })
     ], 
+    secret: process.env.NEXT_PUBLIC_JWT_SECRET,
     callbacks: {
         async signIn({ user, account, profile, email, credentials }) {
             console.log('can he sign in?', user, account, profile, email, credentials);
@@ -29,6 +30,6 @@ export default NextAuth({
             }
         }
       },
-      secret: process.env.NEXT_PUBLIC_JWT_SECRET
+      
     
 })
