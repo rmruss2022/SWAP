@@ -245,15 +245,32 @@ console.log('matche times: ', matchTimes)
     return 0;
   }
 
+  const [pageSelection, setPageSelection] = useState('matches')
+
   if (session) { 
 
     return (
       <div className={`md:w-[750px] w-full h-full p-2`}>
         <AppContext.Provider value={{dropping : droppingCRNs, adding: addingCRNs, semesters : semesters}}>
-          <Feedback feedbacks={feedbacks} />
-          <Matches matches={matches} matchTimes={matchTimes} />
-          <AddCRN addAddedCRN={addAddedCRN} removeAddedCRN={removeAddedCRN} />
-          <DropCRN addDroppedCRN={addDroppedCRN} removeDroppedCRN={removeDroppedCRN} />
+          <div className='flex jusify-between items-center w-full gap-6 mb-4 mt-2'>
+            <button onClick={() => setPageSelection('matches')} className={`p-1.5 ${pageSelection === 'matches' ? 'bg-blue-700 text-white' : 'bg-[white]'} border-2 rounded-md w-[160px]`}>SWAP Matches</button>
+            <button onClick={() => setPageSelection('add')} className={`p-1.5 ${pageSelection === 'add' ? 'bg-blue-700 text-white' : 'bg-[white]'} border-2 rounded-md w-[160px]`}>Add CRN</button>
+            <button onClick={() => setPageSelection('drop')} className={`p-1.5 ${pageSelection === 'drop' ? 'bg-blue-700 text-white' : 'bg-[white]'} border-2 rounded-md w-[160px]`}>Drop CRN</button>
+            <button onClick={() => setPageSelection('profile')} className={`p-1.5 ${pageSelection === 'profile' ? 'bg-blue-700 text-white' : 'bg-[white]'} border-2 rounded-md w-[160px]`}>Profile</button>
+          </div>
+          {pageSelection === 'matches' && (
+            <>
+              <Feedback feedbacks={feedbacks} />
+              <Matches matches={matches} matchTimes={matchTimes} />
+            </>
+          )}
+          {pageSelection === 'add' && (
+            <AddCRN addAddedCRN={addAddedCRN} removeAddedCRN={removeAddedCRN} />
+          )}
+
+          {pageSelection === 'drop' && (
+            <DropCRN addDroppedCRN={addDroppedCRN} removeDroppedCRN={removeDroppedCRN} />
+          )}
         </AppContext.Provider>
       </div>
     )
