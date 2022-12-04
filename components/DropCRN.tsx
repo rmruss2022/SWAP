@@ -37,10 +37,10 @@ const DropCRN = ({removeDroppedCRN, addDroppedCRN} : IProps) => {
                 <AiFillQuestionCircle size={27} />
             </a>
         </div>
-        <div>
+        <div className='flex flex-wrap gap-6'>
         { appContext.semesters.map((semester : iSemester, idx : number) => (
-            <button key={idx} onClick={() => setSelectedSemester(semester)} className={`w-[185px] h-[40px] border-2 rounded-md mt-0 mb-3 jusitfy-center items-center border-[#3661e3] bg-[${selectedSemester.semesterNum === semester.semesterNum ? '#3661e3' : 'white'}]`}>
-                <p className={`text-[${selectedSemester.semesterNum === semester.semesterNum ? 'white' : 'dark:white'}]`}>{semester.year} {semester.semester} </p>
+            <button key={idx} onClick={() => setSelectedSemester(semester)} className={`w-[185px] h-[40px] border-2 rounded-md mt-0 mb-3 jusitfy-center items-center border-[#3661e3] ${selectedSemester.semesterNum === semester.semesterNum  ? 'bg-blue-700 text-white' : 'bg-[white]'}`}>
+                <p className={`text-[${selectedSemester.semesterNum === semester.semesterNum ? 'bg-blue-700 text-white' : 'bg-[white]'}`}>{semester.year} {semester.semester} </p>
             </button>
         )) }
         </div>

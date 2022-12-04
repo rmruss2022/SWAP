@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useContext} from 'react'
 import {TbArrowsLeftRight} from 'react-icons/tb'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -92,9 +92,9 @@ const MatchItem = ({match, id, matchTime, fin}) => {
             <p className='text-2xl font-mono underline'>Matches</p>
         </div>
         <div className='flex gap-6 items-center pb-2'>
-            <p className='text-xl font-mono text-[green]'>{userid === match.userid1 ? match.request1Object[0].add_course : match.request2Object[0].add_course}</p>
+            <p className='text-xl font-mono text-[green]'>{authenticatedContext.user._id === match.userid1 ? match.request1Object[0].add_course : match.request2Object[0].add_course}</p>
             <TbArrowsLeftRight />
-            <p className='text-xl font-mono text-[red]'>{userid === match.userid1 ? match.request1Object[0].drop_course : match.request2Object[0].drop_course}</p>
+            <p className='text-xl font-mono text-[red]'>{authenticatedContext.user._id === match.userid1 ? match.request1Object[0].drop_course : match.request2Object[0].drop_course}</p>
         </div>
         
         <div className='flex flex-col'>
