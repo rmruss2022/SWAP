@@ -62,3 +62,9 @@ export interface iSemester {
     semesterNum : String,
     year : String
 }
+
+export interface iAppContext {
+    dropping : [iDropping], 
+    adding: [iAdding],
+    semesters : [iSemester]
+}

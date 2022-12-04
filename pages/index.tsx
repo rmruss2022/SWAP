@@ -11,7 +11,7 @@ import DropCRN from '../components/DropCRN'
 import { createContext, useContext, useEffect, useState } from 'react'
 import axios from 'axios'
 import { BASE_URL } from '../utils/utils'
-import { iFeedback, iMatch, iSwapTime, iRequest, iAdding, iDropping, iSemester } from '../utils/types'
+import { iFeedback, iMatch, iSwapTime, iRequest, iAdding, iDropping, iSemester, iUser } from '../utils/types'
 import { request } from 'http'
 import { time } from 'console'
 import { match } from 'assert'
@@ -20,17 +20,20 @@ import { getSession, useSession } from "next-auth/react"
 import { AuthenticatedContex } from './_app'
 import useAuthStore from '../store/authStore'
 import { unstable_getServerSession } from 'next-auth/next'
+import {authOptions} from '../pages/api/auth/[...nextauth]'
 
 
 
-
-
-export const getServerSideProps = async(context : any) => {
+export async function getServerSideProps(context : any) {
+  
+  console.log('request: ', context.req)
+  const session = await unstable_getServerSession(context.req, context.res, authOptions)
   
   
-  const session = await unstable_getServerSession(context)
+  const resp = await axios.post(`${BASE_URL}/api/user/createUser`, {name: session!.user?.name, email: session!.user?.email, image: session!.user?.image})
+  const user : iUser = resp.data
   console.log('session: ', session)
-  const authenticatedContext = context.authenticatedContext
+
   const client = await clientPromise;
   const db = client.db("SWAP");
 
@@ -42,7 +45,7 @@ export const getServerSideProps = async(context : any) => {
     {
       $match: {
         submitted: false,
-        userid: new ObjectID(authenticatedContext.user._id)
+        userid: new ObjectID(user._id)
       }
     },
     {
@@ -71,10 +74,10 @@ export const getServerSideProps = async(context : any) => {
             $or : 
               [
                 {
-                  userid1: new ObjectID(authenticatedContext.user._id)
+                  userid1: new ObjectID(user._id)
                 },
                 {
-                  userid2: new ObjectID(authenticatedContext.user._id)
+                  userid2: new ObjectID(user._id)
                 }
               ]
           }
@@ -121,7 +124,7 @@ export const getServerSideProps = async(context : any) => {
       }]).toArray()
     
     for (let j = 0; j < times.length; j++) {
-      if (times[j]['userid'].toString() !== authenticatedContext.user._id) {
+      if (times[j]['userid'].toString() !== user._id) {
         matchTimes[`${matches[i]['_id'].toString()}`]['partnerTime'] = times[j]
       } else {
         matchTimes[`${matches[i]['_id'].toString()}`]['userTime'] = times[j]
@@ -129,7 +132,7 @@ export const getServerSideProps = async(context : any) => {
     }
   }
   // query requests
-  const requests = await db.collection('request').find({userid : new ObjectID(authenticatedContext.user._id)}).toArray();
+  const requests = await db.collection('request').find({userid : new ObjectID(user._id)}).toArray();
   // parse into adding CRN's and Dropping CRN's
   const adding : any = {}
   const dropping : any = {}

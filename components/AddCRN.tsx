@@ -1,7 +1,7 @@
-import React, { useContext, useState } from 'react'
+import React, { Context, useContext, useState } from 'react'
 import {FaTrash} from 'react-icons/fa'
 import { AppContext } from '../pages'
-import { iAdding, iSemester } from '../utils/types'
+import { iAdding, iAppContext, iSemester } from '../utils/types'
 import {AiFillQuestionCircle} from 'react-icons/ai'
 import Link from 'next/link'
 import { motion } from "framer-motion"
@@ -12,7 +12,7 @@ interface IProps {
 }
 const AddCRN = ({addAddedCRN, removeAddedCRN} :  IProps) => {
 
-    const appContext = useContext(AppContext);
+    const appContext : iAppContext = useContext(AppContext);
     const [addInput, setAddInput] = useState('')
     const [selectedSemester, setSelectedSemester] = useState(appContext.semesters[0])
     const [alert, setAlert] = useState('')

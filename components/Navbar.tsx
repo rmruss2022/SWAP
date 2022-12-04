@@ -41,7 +41,7 @@ const Navbar = () => {
         <div className='w-full flex justify-between items-center border-b-2 border-gray-200 py-1 px-4'>
             <Link href='/'>
                 <div className='w-[100px] md:w-[130px]'>
-                    <Image draggable='false' className='cursor-pointer' src={Logo} layout='responsive' />
+                    <Image draggable='false' className='cursor-pointer' src={Logo} layout='responsive' alt={''} />
                 </div>
             </Link>
             
@@ -50,7 +50,7 @@ const Navbar = () => {
                     <div className='flex gap-2 justify-center items-center md:gap-4 '>
                         <div className='flex justify-center items-center gap-5 md:border-2 rounded-md p-1 px-2'>
                             <p className='invisible sm:visible'>{session!.user!.name}</p>
-                            <Image draggable={false} src={session!.user!.image!} width={40} height={40} className='rounded-full' />
+                            <Image draggable={false} src={session!.user!.image!} width={40} height={40} className='rounded-full' alt={''} />
                         </div>
                         <IoMdLogOut size={25} onClick={() => signOut()} className='cursor-pointer' />
                     </div>
