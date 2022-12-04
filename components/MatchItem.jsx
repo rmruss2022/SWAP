@@ -8,7 +8,8 @@ import "react-clock/dist/Clock.css";
 import { iMatch, iSwapTime } from '../utils/types';
 import { BASE_URL } from '../utils/utils';
 import axios from 'axios'
-const userid = '6346d05cd53a982ce15d0601'
+import { AuthenticatedContex } from '../pages/_app';
+
 
 const MatchItem = ({match, id, matchTime, fin}) => {
 
@@ -23,15 +24,16 @@ const MatchItem = ({match, id, matchTime, fin}) => {
     const [showSwap, setShowSwap] = useState(false)
     const [userSwapConfirmed, setUserSwapConfirmed] = useState(false)
     const [partnerSwapConfirmed, setPartnerSwapConfirmed] = useState(false)
+    const authenticatedContext = useContext(AuthenticatedContex)
 
     const submitSuggestedTime = async () => {
-        const resp = await axios.post(`${BASE_URL}/api/swaptime/createTime`, {matchid : match._id, alive : true, userid: userid, time : timeUser, date: startDateUser, confirmed: false, unconfirm : true})
+        const resp = await axios.post(`${BASE_URL}/api/swaptime/createTime`, {matchid : match._id, alive : true, userid: authenticatedContext.user._id, time : timeUser, date: startDateUser, confirmed: false, unconfirm : true})
         setAlert('Updated SWAP Time')
         setInterval(() => setAlert(''), 3000)
     }
 
     const confirmPartnerTime = async () => {
-        const resp = await axios.post(`${BASE_URL}/api/swaptime/createTime`, {matchid : match._id, alive : true, userid: userid, time : timePartner, date: startDatePartner, confirmed: true})
+        const resp = await axios.post(`${BASE_URL}/api/swaptime/createTime`, {matchid : match._id, alive : true, userid: authenticatedContext.user._id, time : timePartner, date: startDatePartner, confirmed: true})
         setTimeUser(timePartner)
         setStartDateUser(startDatePartner)
         setAlert(`Confirmed Partner's Time`)

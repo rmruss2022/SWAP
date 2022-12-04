@@ -16,12 +16,21 @@ import { request } from 'http'
 import { time } from 'console'
 import { match } from 'assert'
 const ObjectID = require("mongodb").ObjectID;
-import { useSession } from "next-auth/react"
+import { getSession, useSession } from "next-auth/react"
+import { AuthenticatedContex } from './_app'
+import useAuthStore from '../store/authStore'
+import { unstable_getServerSession } from 'next-auth/next'
 
-const userid = '6346d05cd53a982ce15d0601'
 
 
-export async function getServerSideProps(context: any) {
+
+
+export const getServerSideProps = async(context : any) => {
+  
+  
+  const session = await unstable_getServerSession(context)
+  console.log('session: ', session)
+  const authenticatedContext = context.authenticatedContext
   const client = await clientPromise;
   const db = client.db("SWAP");
 
@@ -33,7 +42,7 @@ export async function getServerSideProps(context: any) {
     {
       $match: {
         submitted: false,
-        userid: new ObjectID(userid)
+        userid: new ObjectID(authenticatedContext.user._id)
       }
     },
     {
@@ -62,10 +71,10 @@ export async function getServerSideProps(context: any) {
             $or : 
               [
                 {
-                  userid1: new ObjectID(userid)
+                  userid1: new ObjectID(authenticatedContext.user._id)
                 },
                 {
-                  userid2: new ObjectID(userid)
+                  userid2: new ObjectID(authenticatedContext.user._id)
                 }
               ]
           }
@@ -112,7 +121,7 @@ export async function getServerSideProps(context: any) {
       }]).toArray()
     
     for (let j = 0; j < times.length; j++) {
-      if (times[j]['userid'].toString() !== userid) {
+      if (times[j]['userid'].toString() !== authenticatedContext.user._id) {
         matchTimes[`${matches[i]['_id'].toString()}`]['partnerTime'] = times[j]
       } else {
         matchTimes[`${matches[i]['_id'].toString()}`]['userTime'] = times[j]
@@ -120,7 +129,7 @@ export async function getServerSideProps(context: any) {
     }
   }
   // query requests
-  const requests = await db.collection('request').find({userid : new ObjectID(userid)}).toArray();
+  const requests = await db.collection('request').find({userid : new ObjectID(authenticatedContext.user._id)}).toArray();
   // parse into adding CRN's and Dropping CRN's
   const adding : any = {}
   const dropping : any = {}
@@ -167,6 +176,7 @@ export var AppContext = createContext<any>(null);
 const Home = ({feedbacks, matches, matchTimes, adding, dropping, semesters} : IProps) => {
 
   const appContext = useContext(AppContext);
+  const authenticatedContext = useContext(AuthenticatedContex)
  
 console.log('matche times: ', matchTimes)
   console.log(feedbacks, matches, adding, dropping, matchTimes)
@@ -175,11 +185,11 @@ console.log('matche times: ', matchTimes)
   const [matchesState, setMatchesState] = useState([])
   const [addingCRNs, setAddingCRNs] = useState(adding)
   const [droppingCRNs, setDroppingCRNs] = useState(dropping)
-  const [userid, setUserID] = useState('6346d05cd53a982ce15d0601')
+
   const { data: session } = useSession()
   // when requests are updated, call set requests to update ui with updated list of requests
   const setRequests = async () => {
-    const {data} = await axios.get(`${BASE_URL}/api/request/getByUserId?userid=${userid}`)
+    const {data} = await axios.get(`${BASE_URL}/api/request/getByUserId?userid=${authenticatedContext.user._id}`)
     const requests = data;
     // parse into adding CRN's and Dropping CRN's
     const adding : any = {}
@@ -203,13 +213,13 @@ console.log('matche times: ', matchTimes)
 
 
   const removeAddedCRN = async (crn : String) => {
-    const resp = await axios.post(`${BASE_URL}/api/request/batchRemoveFromCRN`, {userid: userid, isAdd: true, crn: crn})
+    const resp = await axios.post(`${BASE_URL}/api/request/batchRemoveFromCRN`, {userid: authenticatedContext.user._id, isAdd: true, crn: crn})
     console.log('resp adddroppedcrn: ', resp)
     setRequests()
   }
   const addAddedCRN = async (crn : String, semesterNum : String, year : String) => {
     try {
-      const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: userid, isAdd : true, dropping : droppingCRNs , crn: crn, semester : semesterNum, year : year})
+      const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: authenticatedContext.user._id, isAdd : true, dropping : droppingCRNs , crn: crn, semester : semesterNum, year : year})
       console.log('resp adddroppedcrn: ', resp)
       setRequests()
     } catch(error) {
@@ -219,13 +229,13 @@ console.log('matche times: ', matchTimes)
   }
   // add a crn to drop, loop through all adding and make new requests
   const addDroppedCRN = async (crn : String) => {
-    const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: userid, isAdd : false, adding: addingCRNs, crn: crn})
+    const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: authenticatedContext.user._id, isAdd : false, adding: addingCRNs, crn: crn})
     console.log('resp adddroppedcrn: ', resp)
     setRequests()
   }
   // remove crn from list of dropping crns
   const removeDroppedCRN = async (crn : String) => {
-    const resp = await axios.post(`${BASE_URL}/api/request/batchRemoveFromCRN`, {userid: userid, isAdd: false, crn: crn})
+    const resp = await axios.post(`${BASE_URL}/api/request/batchRemoveFromCRN`, {userid: authenticatedContext.user._id, isAdd: false, crn: crn})
     console.log('resp removedroppedcrn: ', resp)
     setRequests()
   }

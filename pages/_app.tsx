@@ -1,7 +1,7 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import Navbar from '../components/Navbar'
-import { useState, useEffect, createContext } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import {SessionProvider, useSession} from 'next-auth/react'
 import { userAgent } from 'next/server';
 import { iUser } from '../utils/types';
@@ -11,7 +11,8 @@ export var AuthenticatedContex = createContext<any>(null);
 function MyApp({ Component, pageProps, session }: any) { //session
   const [isSSR, setSSR] = useState(true);
   const [user, setUser] = useState<iUser>({_id : '', name : '', email : '', image : '', role : ''})
-
+  const authenticatedContext = useContext(AuthenticatedContex)
+  pageProps['authenticatedContext'] = authenticatedContext
 
   useEffect(()=> {
     setSSR(false);

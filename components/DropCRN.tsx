@@ -8,7 +8,7 @@ import { AppContext } from '../pages'
 import { iAdding, iDropping, iSemester } from '../utils/types'
 import { BASE_URL } from '../utils/utils'
 
-const userid = '6346d05cd53a982ce15d0601'
+
 
 interface IProps {
     removeDroppedCRN: any,

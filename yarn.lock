@@ -2507,7 +2507,7 @@
   "resolved" "https://registry.npmjs.org/natural-compare/-/natural-compare-1.4.0.tgz"
   "version" "1.4.0"
 
-"next-auth@^4", "next-auth@^4.17.0":
+"next-auth@^4", "next-auth@^4.15.1":
   "integrity" "sha512-aN2tdnjS0MDeUpB2tBDOaWnegkgeMWrsccujbXRGMJ607b+EwRcy63MFGSr0OAboDJEe0902piXQkt94GqF8Qw=="
   "resolved" "https://registry.npmjs.org/next-auth/-/next-auth-4.17.0.tgz"
   "version" "4.17.0"
