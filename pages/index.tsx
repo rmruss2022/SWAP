@@ -21,6 +21,7 @@ import { AuthenticatedContex } from './_app'
 import useAuthStore from '../store/authStore'
 import { unstable_getServerSession } from 'next-auth/next'
 import {authOptions} from '../pages/api/auth/[...nextauth]'
+import Profile from '../components/Profile'
 
 
 
@@ -29,7 +30,18 @@ export async function getServerSideProps(context : any) {
   console.log('request: ', context.req)
   const session = await unstable_getServerSession(context.req, context.res, authOptions)
   
-  
+  if (!session) {
+    return {
+      props: {
+        feedbacks : null,
+        matches: null,
+        matchTimes : null,
+        adding : null,
+        dropping: null,
+        semesters : null
+       },
+    }
+  }
   const resp = await axios.post(`${BASE_URL}/api/user/createUser`, {name: session!.user?.name, email: session!.user?.email, image: session!.user?.image})
   const user : iUser = resp.data
   console.log('session: ', session)
@@ -266,10 +278,10 @@ console.log('matche times: ', matchTimes)
       <div className={`md:w-[750px] w-full h-full p-2`}>
         <AppContext.Provider value={{dropping : droppingCRNs, adding: addingCRNs, semesters : semesters}}>
           <div className='flex jusify-between items-center w-full gap-6 mb-4 mt-2'>
-            <button onClick={() => setPageSelection('matches')} className={`p-1.5 ${pageSelection === 'matches' ? 'bg-blue-700 text-white' : 'bg-[white]'} border-2 rounded-md w-[160px]`}>SWAP Matches</button>
-            <button onClick={() => setPageSelection('add')} className={`p-1.5 ${pageSelection === 'add' ? 'bg-blue-700 text-white' : 'bg-[white]'} border-2 rounded-md w-[160px]`}>Add CRN</button>
-            <button onClick={() => setPageSelection('drop')} className={`p-1.5 ${pageSelection === 'drop' ? 'bg-blue-700 text-white' : 'bg-[white]'} border-2 rounded-md w-[160px]`}>Drop CRN</button>
-            <button onClick={() => setPageSelection('profile')} className={`p-1.5 ${pageSelection === 'profile' ? 'bg-blue-700 text-white' : 'bg-[white]'} border-2 rounded-md w-[160px]`}>Profile</button>
+            <button onClick={() => setPageSelection('matches')} className={`p-1.5 ${pageSelection === 'matches' ? 'bg-blue-700 text-white' : 'bg-[white] dark:text-black'} border-2 rounded-md w-[160px]`}>SWAP Matches</button>
+            <button onClick={() => setPageSelection('add')} className={`p-1.5 ${pageSelection === 'add' ? 'bg-blue-700 text-white' : 'bg-[white] dark:text-black'} border-2 rounded-md w-[160px]`}>Add CRN</button>
+            <button onClick={() => setPageSelection('drop')} className={`p-1.5 ${pageSelection === 'drop' ? 'bg-blue-700 text-white' : 'bg-[white] dark:text-black'} border-2 rounded-md w-[160px]`}>Drop CRN</button>
+            <button onClick={() => setPageSelection('profile')} className={`p-1.5 ${pageSelection === 'profile' ? 'bg-blue-700 text-white' : 'bg-[white] dark:text-black'} border-2 rounded-md w-[160px]`}>Profile</button>
           </div>
           {pageSelection === 'matches' && (
             <>
@@ -283,6 +295,10 @@ console.log('matche times: ', matchTimes)
 
           {pageSelection === 'drop' && (
             <DropCRN addDroppedCRN={addDroppedCRN} removeDroppedCRN={removeDroppedCRN} />
+          )}
+
+          {pageSelection === 'profile' && (
+            <Profile />
           )}
         </AppContext.Provider>
       </div>
