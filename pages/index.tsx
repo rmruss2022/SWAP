@@ -27,7 +27,7 @@ import Profile from '../components/Profile'
 
 export async function getServerSideProps(context : any) {
   
-  console.log('request: ', context.req)
+  // console.log('request: ', context.req)
   const session = await unstable_getServerSession(context.req, context.res, authOptions)
   
   if (!session) {

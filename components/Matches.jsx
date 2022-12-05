@@ -12,7 +12,7 @@ const Matches = ({matches, matchTimes}) => {
     ))}
     {matches.length === 0 && (
       <div className='flex justify-center items-center text-center mt-4 border-2 p-1 rounded-md'>
-        <p className='text-md font-mono'>You do not currently have any matches, add and drop CRN's to SWAP courses with a fellow Hokie 🍗</p>
+        <p className='text-md font-mono'>You do not currently have any matches, add and drop CRN&apos;s to SWAP courses with a fellow Hokie 🍗</p>
       </div>
     )
 
