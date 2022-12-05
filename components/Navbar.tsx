@@ -61,7 +61,7 @@ const Navbar = () => {
                         const user = signIn('google')
                         console.log('next auth sign in callback: ', user)
                         addUser(user)
-                    }} className='bg-[#454893] p-1.5 text-[white] rounded-md w-[120px]'>Sign in</button>
+                    }} className='border-[4px] border-[#454893] p-1.5 text-[white dark:black] rounded-md w-[120px]'>Sign in</button>
                     </>
                 }
             </div>
