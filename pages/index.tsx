@@ -243,8 +243,8 @@ console.log('matche times: ', matchTimes)
     
   }
   // add a crn to drop, loop through all adding and make new requests
-  const addDroppedCRN = async (crn : String) => {
-    const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: authenticatedContext.user._id, isAdd : false, adding: addingCRNs, crn: crn})
+  const addDroppedCRN = async (crn : String, semesterNum : String, year : String) => {
+    const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: authenticatedContext.user._id, isAdd : false, adding: addingCRNs, crn: crn, semester : semesterNum, year : year})
     console.log('resp adddroppedcrn: ', resp)
     setRequests()
   }
