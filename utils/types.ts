@@ -49,13 +49,15 @@ export interface iSwapTime {
 export interface iAdding {
     crn: String,
     title : String,
-    course : String
+    course : String,
+    add_semesterNum : String
 }
 
 export interface iDropping {
     crn: String,
     title : String,
-    course : String
+    course : String,
+    drop_semesterNum : String
 }
 export interface iSemester {
     semester: String,

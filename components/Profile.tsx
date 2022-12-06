@@ -6,11 +6,11 @@ import Torg from '../public/torg-03.png'
 const Profile = () => {
     const authenticatedContext = useContext(AuthenticatedContex)
   return (
-    <div className='w-full'>
-        <div className='flex h-[120px] gap-9 mb-5'>
+    <div className='w-full border-[gray-100] border-2 rounded-xl p-3'>
+        <div className='flex h-[120px] gap-9 mb-5 mt-2'>
             <Image src={authenticatedContext.user.image} className='rounded-full' alt={''} width={120} height={120}  />
             
-            <Image src={Torg} alt={''} className='w-full h-full'    />
+            <Image src={Torg} alt={''} className='w-full h-full' draggable={false}   />
 
         </div>
 

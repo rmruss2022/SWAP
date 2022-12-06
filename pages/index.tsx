@@ -76,7 +76,7 @@ export async function getServerSideProps(context : any) {
   // query open matches
   const matches = await db.collection('matches').aggregate([
     {
-      $match : 
+      $match :
       {
         $and : [
           {
@@ -151,10 +151,10 @@ export async function getServerSideProps(context : any) {
   for (let i = 0; i < requests.length; i++) {
     // console.log('request at i: ', requests[i])
     if (requests[i]['add_crn'] !== 'null') {
-      adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course']}
+      adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course'], add_semesterNum : requests[i].add_semesterNum}
     }
     if (requests[i]['drop_crn'] !== 'null') {
-      dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course']}
+      dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course'], drop_semesterNum : requests[i].drop_semesterNum}
     }
   }
   const addingArr = Object.keys(adding).map(add => adding[add])
