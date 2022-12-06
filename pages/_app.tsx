@@ -5,6 +5,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import {SessionProvider, useSession} from 'next-auth/react'
 import { userAgent } from 'next/server';
 import { iUser } from '../utils/types';
+import Head from 'next/head';
 
 export var AuthenticatedContex = createContext<any>(null);
 
@@ -23,7 +24,34 @@ function MyApp({ Component, pageProps, session }: any) { //session
   if (isSSR) return null;
   return (
 
+  <>
+
+<Head>
+          <title>Swap</title>
+          <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+          <link rel="shortcut icon" href="/favicon/favicon.ico" />
+          <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/images/apple-touch-icon.png"
+          />
+          <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="/images/favicon-32x32.png"
+          />
+          <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="/images/favicon-16x16.png"
+          />
+        </Head>
+
     <SessionProvider session={session}>
+
+      
 
       <AuthenticatedContex.Provider value={{user: user, setUser: setUser}} >
 
@@ -37,7 +65,7 @@ function MyApp({ Component, pageProps, session }: any) { //session
       </AuthenticatedContex.Provider>
 
     </SessionProvider>
-
+  </>
   )
 }
 
