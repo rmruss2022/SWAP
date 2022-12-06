@@ -23,7 +23,7 @@ const DropCRN = ({removeDroppedCRN, addDroppedCRN} : IProps) => {
     const [dropCRN, setDropCRN] = useState('')
     const [semesterYear, setSemesterYear] = useState({year : 2023, semester: 12})
     const appContext = useContext(AppContext);
-
+    const [alert, setAlert] = useState('')
     const [selectedSemester, setSelectedSemester] = useState(appContext.semesters[0])
 
 
@@ -47,7 +47,22 @@ const DropCRN = ({removeDroppedCRN, addDroppedCRN} : IProps) => {
 
         <div className='flex gap-6 items-center pb-4'>
             <input type="text" placeholder='...11856' value={dropCRN} onChange={(e) => setDropCRN(e.target.value)} className={`w-[185px] font-mono p-2 border-1 bg-gray-50 rounded-md text-[black]`} />
-            <button onClick={() => addDroppedCRN(dropCRN, selectedSemester.semesterNum, selectedSemester.year)} className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800'>Drop</button>
+            <button onClick={() =>  {  
+                    async function clicked() {
+                        const resp = await addDroppedCRN(dropCRN, selectedSemester.semesterNum, selectedSemester.year)
+                        console.log('resp: ', resp)
+                        if (resp) {
+                            setAlert('Error invalid CRN or Semester');
+                            setInterval(() => 
+                                setAlert('')
+                            , 3000)
+                        }
+                    }
+                    clicked()
+                }}
+                className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800'>
+                Drop
+            </button>
         </div>
         <div className='w-full'>
             {appContext.dropping.map((drop : iDropping, idx : number) => (
@@ -57,12 +72,16 @@ const DropCRN = ({removeDroppedCRN, addDroppedCRN} : IProps) => {
                         <p className='text-md font-mono'>{drop.crn}, {drop.course}, {drop.title}</p>
                     </div>
                     <div>
-                        <FaTrash onClick={() => removeDroppedCRN(drop.crn)} className='text-xl text-[red] cursor-pointer' />
+                        <FaTrash onClick={() => removeDroppedCRN(drop.crn, selectedSemester.semesterNum, selectedSemester.year)} className='text-xl text-[red] cursor-pointer' />
                     </div>
                 </div>
             ))}
         </div>
         
+        {alert !== '' && 
+        <div className='mt-2 bg-[#ff7070] p-2 rounded-md'>
+            <p>{alert}</p>
+        </div> }
 
     </div>
   )
