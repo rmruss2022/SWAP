@@ -282,6 +282,33 @@ console.log('matche times: ', matchTimes)
 
     return (
       <div className={`md:w-[750px] w-full h-full p-2`}>
+
+
+        <Head>
+          <title>Swap</title>
+          <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+          <link rel="shortcut icon" href="/favicon/favicon.ico" />
+          <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/images/apple-touch-icon.png"
+          />
+          <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="/images/favicon-32x32.png"
+          />
+          <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="/images/favicon-16x16.png"
+          />
+        </Head>
+
+
+
         <AppContext.Provider value={{dropping : droppingCRNs, adding: addingCRNs, semesters : semesters}}>
           <div className='flex jusify-between items-center w-full gap-6 mb-4 mt-2'>
             <button onClick={() => setPageSelection('matches')} className={`p-1.5 ${pageSelection === 'matches' ? 'bg-blue-700 text-white' : 'bg-[white] dark:text-black'} border-2 rounded-md w-[160px]`}>SWAP Matches</button>
