@@ -1,6 +1,6 @@
 import React, { Context, useContext, useState } from 'react'
 import {FaTrash} from 'react-icons/fa'
-import { AppContext } from '../pages'
+import { AppContext } from '../pages/_app'
 import { iAdding, iAppContext, iSemester } from '../utils/types'
 import {TbCalendarTime} from 'react-icons/tb'
 import {AiOutlineQuestionCircle} from 'react-icons/ai'
@@ -24,8 +24,8 @@ const AddCRN = ({addAddedCRN, removeAddedCRN} :  IProps) => {
     <div className=' flex-col mb-3 border-[gray-100] border-2 rounded-xl p-3'>
 
         {/* modal to Course Request Number */}
-        {displayAcronymModal && 
-            <div onClick={() => setDisplayAcronymModal(false)} className='relative mb-2 flex flex-col justify-center sm:w-[700px] w-[100%]  rounded-xl h-[100px] items-center bg-white'>
+        {displayAcronymModal &&
+            <div onClick={() => setDisplayAcronymModal(false)} className='border-2 border-grey cursor-pointer relative mb-2 flex flex-col justify-center sm:w-[700px] w-[100%]  rounded-xl h-[100px] items-center bg-white'>
                 <div className='absolute pb-[50px] pr-[7px] w-[100%] '>
                     <IoRemoveCircleSharp color='black' size={30} className=' t-0 float-right'/>
                 </div>
@@ -36,8 +36,8 @@ const AddCRN = ({addAddedCRN, removeAddedCRN} :  IProps) => {
 
         {/* title */}
         <div className='pb-3 flex flex-wrap justify-between gap-2 cursor-pointer'>
-            <div className='flex'>
-                <p onClick={() => setDisplayAcronymModal(true)} className='text-2xl font-mono underline'>CRNs to Add</p>
+            <div onClick={() => setDisplayAcronymModal(true)} className='flex'>
+                <p className='text-2xl font-mono underline'>CRNs to Add</p>
                 <AiOutlineQuestionCircle size={25} className='p-1' />
             </div>
             <a target="_blank" href='https://apps.es.vt.edu/ssb/HZSKVTSC.P_DispRequest' rel="noopener noreferrer">

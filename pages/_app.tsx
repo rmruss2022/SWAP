@@ -8,10 +8,15 @@ import { iUser } from '../utils/types';
 import Head from 'next/head';
 
 export var AuthenticatedContex = createContext<any>(null);
+export var AppContext = createContext<any>(null);
 
 function MyApp({ Component, pageProps, session }: any) { //session
   const [isSSR, setSSR] = useState(true);
   const [user, setUser] = useState<iUser>({_id : '', name : '', email : '', image : '', role : ''})
+  const [addingCRNs, setAddingCRNs] = useState([])
+  const [droppingCRNs, setDroppingCRNs] = useState([])
+  const [semesters , setSemesters] = useState([])
+
   const authenticatedContext = useContext(AuthenticatedContex)
   pageProps['authenticatedContext'] = authenticatedContext
 
@@ -55,12 +60,15 @@ function MyApp({ Component, pageProps, session }: any) { //session
 
       <AuthenticatedContex.Provider value={{user: user, setUser: setUser}} >
 
+      <AppContext.Provider value={{dropping : droppingCRNs, setDroppingCRNs : setDroppingCRNs, adding: addingCRNs, setAddingCRNs: setAddingCRNs, semesters : semesters, setSemesters}}>
+
         <div className='xl:w-[1200] m-auto overflow-hidden h-[100vh]'>
           <Navbar />
           <div className='mt-0 flex-col gap-10 overflow-auto h-[88vh] videos flex-1 flex justify-center items-center'>
             <Component {...pageProps} />
           </div>
         </div>
+        </AppContext.Provider>
 
       </AuthenticatedContex.Provider>
 

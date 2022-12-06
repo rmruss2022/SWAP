@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { TbCalendarTime } from 'react-icons/tb'
 import {FaTrash} from 'react-icons/fa'
 import { sortAndDeduplicateDiagnostics } from 'typescript'
-import { AppContext } from '../pages'
+import { AppContext } from '../pages/_app'
 import { iAdding, iDropping, iSemester } from '../utils/types'
 import { BASE_URL } from '../utils/utils'
 import { AiOutlineQuestionCircle } from 'react-icons/ai'
@@ -34,17 +34,17 @@ const DropCRN = ({removeDroppedCRN, addDroppedCRN} : IProps) => {
   return (
     <div className='flex-col mb-14 border-[gray-100] border-2 rounded-xl p-3 w-full'>
         {/* modal to Course Request Number */}
-        {displayAcronymModal && 
-            <div onClick={() => setDisplayAcronymModal(false)} className='relative mb-2 flex flex-col justify-center sm:w-[700px] w-[100%]  rounded-xl h-[100px] items-center bg-white'>
+        { displayAcronymModal && 
+            <div onClick={() => setDisplayAcronymModal(false)} className='border-2 border-grey relative mb-2 flex flex-col justify-center sm:w-[700px] w-[100%]  rounded-xl h-[100px] items-center bg-white'>
                 <div className='absolute pb-[50px] pr-[7px] w-[100%] '>
                     <IoRemoveCircleSharp color='black' size={30} className=' t-0 float-right'/>
                 </div>
                 <p className='pl-2 text-black font-mono text-xl'>CRN : Course Request Number</p>
             </div>
-        }
+        } 
         <div className='pb-3 flex flex-wrap justify-between gap-2 cursor-pointer w-full'>
-        <div className='flex'>
-                <p onClick={() => setDisplayAcronymModal(true)} className='text-2xl font-mono underline'>CRNs to Drop</p>
+            <div onClick={() => setDisplayAcronymModal(true)} className='flex'>
+                <p className='text-2xl font-mono underline'>CRNs to Drop</p>
                 <AiOutlineQuestionCircle size={25} className='p-1' />
             </div>
             <a target="_blank" href='https://apps.es.vt.edu/ssb/HZSKVTSC.P_DispRequest' rel="noopener noreferrer">

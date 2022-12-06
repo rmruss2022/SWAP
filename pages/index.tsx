@@ -17,7 +17,7 @@ import { time } from 'console'
 import { match } from 'assert'
 const ObjectID = require("mongodb").ObjectID;
 import { getSession, useSession } from "next-auth/react"
-import { AuthenticatedContex } from './_app'
+import { AppContext, AuthenticatedContex } from './_app'
 import useAuthStore from '../store/authStore'
 import { unstable_getServerSession } from 'next-auth/next'
 import {authOptions} from '../pages/api/auth/[...nextauth]'
@@ -186,11 +186,11 @@ interface IProps {
   dropping: [iDropping],
   semesters : [iSemester]
 }
-export var AppContext = createContext<any>(null);
 
 const Home = ({feedbacks, matches, matchTimes, adding, dropping, semesters} : IProps) => {
 
   const appContext = useContext(AppContext);
+  
   const authenticatedContext = useContext(AuthenticatedContex)
  
 console.log('matche times: ', matchTimes)
@@ -198,10 +198,19 @@ console.log('matche times: ', matchTimes)
   // hooks
   const [feedbacksState, setFeedbacksState] = useState(feedbacks)
   const [matchesState, setMatchesState] = useState([])
-  const [addingCRNs, setAddingCRNs] = useState(adding)
-  const [droppingCRNs, setDroppingCRNs] = useState(dropping)
+  
 
   const { data: session } = useSession()
+
+
+  // use effect
+  useEffect(() => {
+    appContext.setSemesters(semesters)
+    appContext.setDroppingCRNs(dropping)
+    appContext.setAddingCRNs(adding)
+  },[])
+
+
   // when requests are updated, call set requests to update ui with updated list of requests
   const setRequests = async () => {
     const {data} = await axios.get(`${BASE_URL}/api/request/getByUserId?userid=${authenticatedContext.user._id}`)
@@ -213,17 +222,17 @@ console.log('matche times: ', matchTimes)
       console.log('requests add_crn', requests[i]['add_crn'])
 
       if (requests[i]['add_crn'] !== 'null') {
-        adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course']}
+        adding[requests[i]['add_crn']] = {crn : requests[i]['add_crn'], title : requests[i]['add_classtitle'], course : requests[i]['add_course'], add_semesterNum : requests[i]['add_semesterNum']}
       }
       if (requests[i]['drop_crn'] !== 'null') {
-      dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course']}
+      dropping[requests[i]['drop_crn']] = {crn : requests[i]['drop_crn'], title : requests[i]['drop_classtitle'], course : requests[i]['drop_course'], drop_semesterNum : requests[i]['drop_semesterNum']}
       }
     }
     const addingArr : any = Object.keys(adding).map(add => adding[add])
     const droppingArr : any = Object.keys(dropping).map(drop => dropping[drop])
     console.log('droppingarr: ', droppingArr)
-    setDroppingCRNs(droppingArr)
-    setAddingCRNs(addingArr)
+    appContext.setDroppingCRNs(droppingArr)
+    appContext.setAddingCRNs(addingArr)
   }
 
 
@@ -234,7 +243,7 @@ console.log('matche times: ', matchTimes)
   }
   const addAddedCRN = async (crn : String, semesterNum : String, year : String) => {
     try {
-      const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: authenticatedContext.user._id, isAdd : true, dropping : droppingCRNs , crn: crn, semester : semesterNum, year : year})
+      const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: authenticatedContext.user._id, isAdd : true, dropping : appContext.dropping , crn: crn, semester : semesterNum, year : year})
       console.log('resp adddroppedcrn: ', resp)
       setRequests()
     } catch(error) {
@@ -244,8 +253,9 @@ console.log('matche times: ', matchTimes)
   }
   // add a crn to drop, loop through all adding and make new requests
   const addDroppedCRN = async (crn : String, semesterNum : String, year : String) => {
+    console.log('trying to drop a class', appContext.adding)
     try {
-      const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: authenticatedContext.user._id, isAdd : false, adding: addingCRNs, crn: crn, semester : semesterNum, year : year})
+      const resp = await axios.post(`${BASE_URL}/api/request/batchCreateFromCRN`, {userid: authenticatedContext.user._id, isAdd : false, adding: appContext.adding, crn: crn, semester : semesterNum, year : year})
       console.log('resp adddroppedcrn: ', resp)
       setRequests()
     } catch(error) {
@@ -288,7 +298,6 @@ console.log('matche times: ', matchTimes)
 
 
 
-        <AppContext.Provider value={{dropping : droppingCRNs, adding: addingCRNs, semesters : semesters}}>
           <div className='flex jusify-between items-center w-full gap-6 mb-4 mt-2'>
             <button onClick={() => setPageSelection('matches')} className={`p-1.5 ${pageSelection === 'matches' ? 'bg-blue-700 text-white' : 'bg-[white] dark:text-black'} border-2 rounded-md w-[160px]`}>SWAP Matches</button>
             <button onClick={() => setPageSelection('add')} className={`p-1.5 ${pageSelection === 'add' ? 'bg-blue-700 text-white' : 'bg-[white] dark:text-black'} border-2 rounded-md w-[160px]`}>Add CRN</button>
@@ -312,7 +321,6 @@ console.log('matche times: ', matchTimes)
           {pageSelection === 'profile' && (
             <Profile />
           )}
-        </AppContext.Provider>
       </div>
     )
   } else {

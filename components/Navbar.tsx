@@ -48,7 +48,7 @@ const Navbar = () => {
             <div className='flex justify-center items-center'>
                 {session &&
                     <div className='flex gap-2 justify-center items-center md:gap-4 '>
-                        <div className='flex justify-center items-center gap-5 md:border-2 rounded-md p-1 px-2'>
+                        <div className='flex justify-center items-center gap-5 sm:border-2 rounded-md p-1 px-2'>
                             <p className='invisible sm:visible'>{session!.user!.name}</p>
                             <Image draggable={false} src={session!.user!.image!} width={40} height={40} className='rounded-full' alt={''} />
                         </div>

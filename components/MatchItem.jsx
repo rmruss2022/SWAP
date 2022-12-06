@@ -45,19 +45,17 @@ const MatchItem = ({match, id, matchTime, fin}) => {
             startDatePartner.getFullYear() === startDateUser.getFullYear() &&
             startDatePartner.getMonth() === startDateUser.getMonth() &&
             startDatePartner.getDate() === startDateUser.getDate() &&
-            Math.abs(Date.parse(`${startDatePartner.getDate()} ${startDatePartner.toLocaleString('default', { month: 'short' })} ${startDatePartner.getFullYear()} ${timePartner} GMT`) - (new Date() - 18000000)) < 60000000) {
+            Math.abs(Date.parse(`${startDatePartner.getDate()} ${startDatePartner.toLocaleString('default', { month: 'short' })} ${startDatePartner.getFullYear()} ${timePartner} GMT`) - (new Date() - 18000000)) < 600000) {
                 
                 setShowSwap(true)
-
-
         }
         
     }
 
     const userSwapConfirm = async () => {
-        console.log('confirming swap')
         setUserSwapConfirmed(true)
-        await axios.post(`${BASE_URL}/api/matches/updateConfirmSwap`, {matchid : match._id, userid1: userid, userid2: '6345bc51042ce99a2131e0cd', requestid1: userid === match.userid1 ? match.request_1 : match.request_2, requestid2: userid !== match.userid1 ? match.request_2 : match.request_1}) 
+        console.log('confirmed swap : ', authenticatedContext.user._id)
+        await axios.post(`${BASE_URL}/api/matches/updateConfirmSwap`, {matchid : match._id,  updatingUser : authenticatedContext.user._id, userid1: match.userid1, userid2: match.userid2 , requestid1: authenticatedContext.user._id === match.userid1 ? match.request_1 : match.request_2, requestid2: authenticatedContext.user._id !== match.userid1 ? match.request_2 : match.request_1}) 
     }
 
     var interval;
@@ -69,9 +67,11 @@ const MatchItem = ({match, id, matchTime, fin}) => {
         }
         isSwapTime()
         interval = setInterval(async() => {
-            if (showSwap && !partnerSwapConfirmed) {
-                console.log('hi')
-                const resp = await axios.post(`${BASE_URL}/api/matches/checkPartnerConfirmedSwap`, {matchid : match._id, user1 : userid === match.userid1})
+            if (showSwap && !partnerSwapConfirmed && authenticatedContext.user._id) {
+                console.log('user1 auth: ', authenticatedContext)
+                console.log('user1 match: ', match.userid1.toString())
+                const resp = await axios.post(`${BASE_URL}/api/matches/checkPartnerConfirmedSwap`, {matchid : match._id, user1 : authenticatedContext.user._id === match.userid1.toString()})
+                // const resp = {data : {partnerConfirmed : false}}
                 if (resp.data.partnerConfirmed) {
                     setPartnerSwapConfirmed(true)
                     clearInterval(interval)
@@ -81,7 +81,7 @@ const MatchItem = ({match, id, matchTime, fin}) => {
           }, 2000);
         
         return () => clearInterval(interval);
-    }, [showSwap])
+    }, [showSwap, authenticatedContext.user])
 
     
 
@@ -115,7 +115,7 @@ const MatchItem = ({match, id, matchTime, fin}) => {
 
             {Object.keys(matchTime).includes('partnerTime') && matchTime['partnerTime'].confirmed === true && showSwap &&
                 <div className='flex gap-3 flex-wrap'>
-                    <button onClick={userSwapConfirm} className={`w-[180px] h-[70px] ${userSwapConfirmed ? 'bg-[green]' : 'bg-[orange]'} rounded-md text-white`}>
+                    <button onClick={ userSwapConfirm} className={`w-[180px] h-[70px] ${userSwapConfirmed ? 'bg-[green]' : 'bg-[orange]'} rounded-md text-white`}>
                         SWAP Now!
                     </button>
                     <button disabled className={`w-[180px] h-[70px] ${partnerSwapConfirmed ? 'bg-[green]' : 'bg-[orange]'} rounded-md text-white`}>
